@@ -10,7 +10,7 @@ const DEFAULT_PRODUCTS = [
     {
         id: "prod_metal_bed",
         name: "Standard Metal Double Bed",
-        category: "beds",
+        category: "metal-beds",
         description: "Heavy-duty steel pipe double bed frame. Hand-welded, rust-protected matte black finish.",
         price: "180,000 RWF",
         availability: "In Stock"
