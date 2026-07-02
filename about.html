@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Bsabity Furniture Workshop Rwanda</title>
+    <meta name="description" content="Read about Bsabity Furniture Workshop's history, mission, vision, and dedication to crafting superior wooden and metal furniture in Rwanda.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/icons/icon-72x72.png">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div class="loader-wrapper" id="loader-wrapper">
+        <div class="loader-logo">Bsabity<span>Furniture</span></div>
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header>
+        <nav class="nav-container">
+            <a href="index.html" class="logo-container" aria-label="Bsabity Home">
+                <i class="fas fa-couch logo-icon"></i>
+                <div class="logo-text">Bsabity<span>Furniture</span></div>
+            </a>
+
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html" data-i18n="nav-home">Home</a></li>
+                <li><a href="about.html" class="active" data-i18n="nav-about">About Us</a></li>
+                <li><a href="services.html" data-i18n="nav-services">Services</a></li>
+                <li><a href="gallery.html" data-i18n="nav-gallery">Gallery</a></li>
+                <li><a href="products.html" data-i18n="nav-products">Products</a></li>
+                <li><a href="contact.html" data-i18n="nav-contact">Contact Us</a></li>
+                <li><a href="admin.html" data-i18n="nav-admin">Admin Panel</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="btn-icon" id="lang-toggle" aria-label="Change Language">
+                    <i class="fas fa-globe"></i> EN
+                </button>
+                <button class="btn-icon" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn-icon menu-toggle" id="menu-toggle" aria-label="Open Mobile Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Page Header Banner -->
+        <section class="hero-section" style="min-height: 40vh; padding: 6rem 2rem 3rem; background-color: var(--bg-secondary);">
+            <div class="section-container text-center">
+                <span class="hero-subtitle" data-i18n="about-sub">Our Story</span>
+                <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 1rem;">Who We Are</h1>
+                <p class="hero-desc" style="max-width: 700px; margin: 0 auto;">Pioneering metal and wood engineering excellence in Kigali, Rwanda.</p>
+            </div>
+        </section>
+
+        <!-- Company History & Story -->
+        <section class="about-section">
+            <div class="section-container about-grid">
+                <div class="about-content">
+                    <span class="section-subtitle">Pioneering Design</span>
+                    <h2>Our Journey & Craft</h2>
+                    <p class="about-para">Bsabity Furniture Workshop was founded in 2012 by an ambitious team of local artisans determined to redefine the local manufacturing industry. What started as a humble carpentry shop with a single workbench has evolved into a premier design and metal fabrication factory in Rwanda.</p>
+                    <p class="about-para">We recognized early on that consumers were forced to choose between cheap, easily-damaged imports or unaffordable custom work. Bsabity was established to fill this gap: providing local, custom-manufactured, exceptionally durable metal and wooden furniture direct to customers at factory-direct pricing.</p>
+                    <p class="about-para">Today, we employ over 15 skilled craftspeople, welding specialists, and designers. We use local sustainable timbers and premium industrial-strength steel to ensure that every table, bed frame, wardrobe, and cabinet we sell is an investment that lasts for generations.</p>
+                </div>
+                <img class="about-img" src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=800" alt="Carpentry design drawings and master tools" loading="lazy">
+            </div>
+        </section>
+
+        <!-- Mission & Vision Cards -->
+        <section class="why-section" style="background-color: var(--bg-secondary);">
+            <div class="section-container">
+                <div class="values-grid" style="margin-top: 0;">
+                    <div class="value-item" style="background-color: var(--bg-card); padding: 3rem 2rem; border-radius: var(--border-radius);">
+                        <div class="value-icon"><i class="fas fa-bullseye"></i></div>
+                        <h2 style="margin-bottom: 1rem; font-family: var(--font-heading);" data-i18n="mission-title">Our Mission</h2>
+                        <p style="color: var(--text-secondary); font-size: 1.05rem;" data-i18n="mission-desc">To design and manufacture durable, exquisite furniture that enriches Rwandese homes and corporate spaces with lasting comfort.</p>
+                    </div>
+                    <div class="value-item" style="background-color: var(--bg-card); padding: 3rem 2rem; border-radius: var(--border-radius);">
+                        <div class="value-icon"><i class="fas fa-eye"></i></div>
+                        <h2 style="margin-bottom: 1rem; font-family: var(--font-heading);" data-i18n="vision-title">Our Vision</h2>
+                        <p style="color: var(--text-secondary); font-size: 1.05rem;" data-i18n="vision-desc">To be the leading indigenous furniture maker in East Africa, recognized for unmatched engineering, design, and integrity.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Values Section -->
+        <section class="core-values">
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-subtitle">Values</span>
+                    <h2 class="section-title">What Drives Us</h2>
+                    <p class="section-desc">Every piece of furniture we manufacture complies with these three fundamental standards.</p>
+                </div>
+                <div class="why-grid">
+                    <div class="why-card">
+                        <div class="why-icon-box"><i class="fas fa-medal"></i></div>
+                        <h3>Integrity of Timber</h3>
+                        <p>We do not cut corners with cheap wood veneers. We select verified, solid hardwood timbers that withstand tropical humidity and high mechanical stresses.</p>
+                    </div>
+                    <div class="why-card">
+                        <div class="why-icon-box"><i class="fas fa-hammer"></i></div>
+                        <h3>Exceptional Joinery</h3>
+                        <p>Our joints are hand-constructed and triple-reinforced. From precise mortise-and-tenon wood joins to professional-grade metal MIG welds, our engineering ensures zero wiggles.</p>
+                    </div>
+                    <div class="why-card">
+                        <div class="why-icon-box"><i class="fas fa-leaf"></i></div>
+                        <h3>Sustainable Sourcing</h3>
+                        <p>We support responsible forestry in Rwanda and East Africa. 100% of our wood supply is sustainably sourced and certified by environmental authorities.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <button class="scroll-top" id="scroll-top" aria-label="Scroll to top"><i class="fas fa-chevron-up"></i></button>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-about">
+                <div class="logo-container">
+                    <i class="fas fa-couch logo-icon"></i>
+                    <div class="logo-text">Bsabity<span>Furniture</span></div>
+                </div>
+                <p class="footer-desc">Premium metal fabrications and custom wooden furniture workshop based in Rwanda, serving clients across East Africa since 2012.</p>
+                <div class="footer-socials">
+                    <a href="#" class="footer-social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                    <a href="https://wa.me/250783847520" class="footer-social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="services.html">Our Services</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Our Manufacture</h3>
+                <ul class="footer-links">
+                    <li><a href="services.html">Metal & Wooden Beds</a></li>
+                    <li><a href="services.html">Custom Office Tables</a></li>
+                    <li><a href="services.html">Solid Wood Dining Sets</a></li>
+                    <li><a href="services.html">Modular Wardrobes</a></li>
+                    <li><a href="services.html">Custom Cabinetry</a></li>
+                    <li><a href="services.html">Interior & Outdoor Sets</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Bsabity Furniture Workshop. All Rights Reserved.</p>
+            <p>Made in Kigali, Rwanda.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

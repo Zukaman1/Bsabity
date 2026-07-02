@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Bsabity Furniture Workshop Rwanda</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/icons/icon-72x72.png">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div class="loader-wrapper" id="loader-wrapper">
+        <div class="loader-logo">Bsabity<span>Furniture</span></div>
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header>
+        <nav class="nav-container">
+            <a href="index.html" class="logo-container" aria-label="Bsabity Home">
+                <i class="fas fa-couch logo-icon"></i>
+                <div class="logo-text">Bsabity<span>Furniture</span></div>
+            </a>
+
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html" data-i18n="nav-home">Home</a></li>
+                <li><a href="about.html" data-i18n="nav-about">About Us</a></li>
+                <li><a href="services.html" data-i18n="nav-services">Services</a></li>
+                <li><a href="gallery.html" data-i18n="nav-gallery">Gallery</a></li>
+                <li><a href="products.html" data-i18n="nav-products">Products</a></li>
+                <li><a href="contact.html" data-i18n="nav-contact">Contact Us</a></li>
+                <li><a href="admin.html" class="active" data-i18n="nav-admin">Admin Panel</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="btn-icon" id="lang-toggle" aria-label="Change Language">
+                    <i class="fas fa-globe"></i> EN
+                </button>
+                <button class="btn-icon" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn-icon menu-toggle" id="menu-toggle" aria-label="Open Mobile Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        
+        <!-- Admin Login Panel (Visible if not authenticated) -->
+        <section id="admin-login-section" style="display: block; padding-top: 4rem;">
+            <div class="admin-login-card">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-shield" style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                    <h1 style="font-family: var(--font-heading); font-size: 1.8rem; margin-bottom: 0.5rem;">Admin Sign In</h1>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">Default credentials required to update pricing or products.</p>
+                </div>
+                <form id="admin-login-form">
+                    <div class="form-group">
+                        <label class="form-label" for="admin-password">Enter Master Password</label>
+                        <input class="form-control" type="password" id="admin-password" required placeholder="••••••••" autocomplete="current-password">
+                        <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">Tip: Use default password <strong>admin123</strong></small>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full">Access Dashboard <i class="fas fa-sign-in-alt"></i></button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard Panel (Visible once authenticated) -->
+        <section id="admin-dashboard-section" style="display: none;">
+            <div class="section-container">
+                
+                <div class="admin-header-actions" style="margin-bottom: 2rem;">
+                    <div>
+                        <span class="section-subtitle">Bsabity Workshop</span>
+                        <h1 style="font-size: 2.25rem; font-family: var(--font-heading);">Management Panel</h1>
+                    </div>
+                    <button class="btn btn-secondary" onclick="logoutAdmin()"><i class="fas fa-sign-out-alt"></i> Sign Out</button>
+                </div>
+
+                <div class="admin-grid" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; align-items: start;">
+                    
+                    <!-- Admin Left Column: Create/Edit Product Forms -->
+                    <div class="admin-sidebar-forms">
+                        
+                        <!-- Card 1: Product Management -->
+                        <div class="admin-sidebar" style="margin-bottom: 2rem; border-top: 4px solid #059669; background-color: var(--bg-card); border-radius: var(--border-radius); border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 2rem;">
+                            <h2 class="admin-form-title" id="form-action-title" style="margin-bottom: 1.5rem; font-size: 1.5rem; font-family: var(--font-heading); color: var(--text-primary);"><i class="fas fa-box-open" style="color: #059669; margin-right: 0.5rem;"></i> Add New Product</h2>
+                            <form id="admin-product-form">
+                                <input type="hidden" id="product-id" value="">
+
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="form-label" for="product-name" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Product Name</label>
+                                    <input class="form-control" type="text" id="product-name" required placeholder="e.g. Modern King Bed">
+                                </div>
+
+                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="product-category" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Category</label>
+                                        <select class="form-control" id="product-category" required>
+                                            <!-- Dynamically populated -->
+                                        </select>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="product-avail" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Availability</label>
+                                        <select class="form-control" id="product-avail" required>
+                                            <option value="In Stock">In Stock (Instant)</option>
+                                            <option value="Custom Build">Custom Build</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="form-label" for="product-desc" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Description</label>
+                                    <textarea class="form-control" id="product-desc" rows="3" required placeholder="Details on timber type, dimensions..."></textarea>
+                                </div>
+
+                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="product-price" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Price Guide (RWF)</label>
+                                        <input class="form-control" type="text" id="product-price" required placeholder="e.g. 180,000 RWF">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="product-discount" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Discount (%)</label>
+                                        <input class="form-control" type="number" id="product-discount" min="0" max="100" placeholder="e.g. 15 (leave 0 for none)">
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label class="form-label" for="product-image-file" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Product Image File</label>
+                                    <input class="form-control" type="file" id="product-image-file" accept="image/*">
+                                    <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Upload new file or keep existing image.</small>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-full" style="background-color: #059669; border-color: #059669; padding: 0.75rem 1.5rem;"><i class="fas fa-save"></i> Save Product Details</button>
+                            </form>
+                        </div>
+
+                        <!-- Card 2: Gallery Direct Image Upload (Supports Bulk Upload) -->
+                        <div class="admin-sidebar" style="margin-bottom: 2rem; border-top: 4px solid var(--accent); background-color: var(--bg-card); border-radius: var(--border-radius); border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 2rem;">
+                            <h2 class="admin-form-title" style="margin-bottom: 1.5rem; font-size: 1.5rem; font-family: var(--font-heading); color: var(--text-primary);"><i class="fas fa-images" style="color: var(--accent); margin-right: 0.5rem;"></i> Upload Gallery Images</h2>
+                            <form id="admin-gallery-form">
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="form-label" for="gallery-img-title" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Project Title (For First Image)</label>
+                                    <input class="form-control" type="text" id="gallery-img-title" placeholder="e.g. Executive Boardroom Table">
+                                    <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Subsequent images will use filenames as title.</small>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="form-label" for="gallery-img-category" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Gallery Category</label>
+                                    <select class="form-control" id="gallery-img-category" required>
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom: 1.5rem;">
+                                    <label class="form-label" for="gallery-img-file" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Select Image File(s)</label>
+                                    <input class="form-control" type="file" id="gallery-img-file" accept="image/*" multiple required>
+                                    <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Supports selecting multiple files for bulk upload.</small>
+                                </div>
+
+                                <!-- Dynamic Upload Progress Indicators -->
+                                <div id="upload-progress-container" style="display: none; margin-bottom: 1.5rem; background: var(--bg-secondary); border-radius: var(--border-radius); padding: 1.25rem; border: 1px solid var(--border-color);">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600; color: var(--text-primary);">
+                                        <span id="upload-progress-text">Preparing upload...</span>
+                                        <span id="upload-progress-percent">0%</span>
+                                    </div>
+                                    <div style="background: rgba(var(--accent-rgb), 0.15); border-radius: 10px; height: 10px; overflow: hidden; width: 100%;">
+                                        <div id="upload-progress-bar" style="background: var(--accent); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-secondary w-full" style="background-color: var(--accent); color: white; border-color: var(--accent); padding: 0.75rem 1.5rem;"><i class="fas fa-cloud-upload-alt"></i> Upload Gallery Assets</button>
+                            </form>
+                        </div>
+
+                        <!-- Card 3: Google Drive API Configuration (Clean Responsive Card) -->
+                        <div class="admin-sidebar" style="margin-bottom: 2rem; border-top: 4px solid #3b82f6; background-color: var(--bg-card); border-radius: var(--border-radius); border-left: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 2rem;">
+                            <h2 class="admin-form-title" style="margin-bottom: 1.5rem; font-size: 1.5rem; font-family: var(--font-heading); color: var(--text-primary);"><i class="fab fa-google-drive" style="color: #3b82f6; margin-right: 0.5rem;"></i> Google Drive Settings</h2>
+                            <form id="admin-gdrive-form">
+                                <div class="form-group" style="margin-bottom: 1.25rem;">
+                                    <label class="form-label" for="gdrive-client-id" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">OAuth Client ID</label>
+                                    <input class="form-control" type="text" id="gdrive-client-id" placeholder="123456...apps.googleusercontent.com">
+                                </div>
+                                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="gdrive-api-key" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">API Key (Optional)</label>
+                                        <input class="form-control" type="text" id="gdrive-api-key" placeholder="AIzaSy...">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="gdrive-folder-id" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Drive Folder ID</label>
+                                        <input class="form-control" type="text" id="gdrive-folder-id" placeholder="Folder ID where assets live">
+                                    </div>
+                                </div>
+                                <div class="button-group" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                    <button type="submit" class="btn btn-secondary" style="flex: 1; min-width: 130px; padding: 0.75rem 1rem;"><i class="fas fa-save"></i> Save Settings</button>
+                                    <button type="button" class="btn btn-primary" id="btn-gdrive-auth" style="flex: 1.2; min-width: 160px; background-color: #3b82f6; border-color: #3b82f6; padding: 0.75rem 1rem;"><i class="fab fa-google"></i> Connect Google Drive</button>
+                                </div>
+                                <div id="gdrive-connection-status" style="margin-top: 1.25rem; text-align: center; font-weight: bold; font-size: 0.95rem; display: none;">
+                                    <span style="color: #059669; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(5,150,105,0.1); padding: 0.5rem 1rem; border-radius: 30px;">
+                                        <i class="fas fa-check-circle"></i> Connected to Google Drive
+                                    </span>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+
+                    <!-- Admin Right Column: Active Tables List -->
+                    <div class="admin-tables-column">
+                        
+                        <!-- Table 1: Product Inventory -->
+                        <div class="admin-table-card mb-4" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+                            <div class="admin-table-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                    <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-boxes" style="color: #059669;"></i> Active Product Catalog</h3>
+                                    <span class="price-tag-badge" id="product-count-badge">Total</span>
+                                </div>
+                                <div style="display: flex; gap: 1rem; width: 100%; flex-wrap: wrap;">
+                                    <input type="text" id="admin-search-products" placeholder="Search catalog..." class="form-control" style="flex: 1.5; min-width: 180px; padding: 0.6rem 1rem; font-size: 0.9rem;">
+                                    <select id="admin-filter-category" class="form-control" style="flex: 1; min-width: 150px; padding: 0.6rem 1rem; font-size: 0.9rem;">
+                                        <option value="all">All Categories</option>
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="price-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product & Category</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th style="width: 100px; text-align: right;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-products-table">
+                                        <!-- Loaded Dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Table 2: Gallery Assets with checkboxes for bulk deletion -->
+                        <div class="admin-table-card" style="background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius); overflow: hidden; box-shadow: var(--shadow-sm);">
+                            <div class="admin-table-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                                <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;"><i class="fas fa-images" style="color: var(--accent);"></i> Active Gallery Assets</h3>
+                                <button id="btn-delete-multiple-gallery" class="btn btn-secondary btn-sm" style="display: none; background-color: #dc2626; border-color: #dc2626; color: white; padding: 0.4rem 0.8rem; font-size: 0.85rem; border-radius: var(--border-radius); cursor: pointer;"><i class="fas fa-trash"></i> Delete Selected (<span id="selected-gallery-count">0</span>)</button>
+                            </div>
+                            <div class="table-wrapper">
+                                <table class="price-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 45px; text-align: center;"><input type="checkbox" id="select-all-gallery" style="width: 18px; height: 18px; cursor: pointer;"></th>
+                                            <th>Image Asset Details</th>
+                                            <th style="width: 100px; text-align: right;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-gallery-table">
+                                        <!-- Loaded Dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <button class="scroll-top" id="scroll-top" aria-label="Scroll to top"><i class="fas fa-chevron-up"></i></button>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-about">
+                <div class="logo-container">
+                    <i class="fas fa-couch logo-icon"></i>
+                    <div class="logo-text">Bsabity<span>Furniture</span></div>
+                </div>
+                <p class="footer-desc">Premium metal fabrications and custom wooden furniture workshop based in Rwanda, serving clients across East Africa since 2012.</p>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="services.html">Our Services</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Bsabity Furniture Workshop. All Rights Reserved.</p>
+            <p>Made in Kigali, Rwanda.</p>
+        </div>
+    </footer>
+
+    <!-- Admin Panel Logic Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/google-drive.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

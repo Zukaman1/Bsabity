@@ -1,0 +1,6 @@
+{
+  "name": "Bsabity Furniture Workshop",
+  "description": "Premium metal and wooden furniture workshop in Rwanda.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

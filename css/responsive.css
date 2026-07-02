@@ -1,0 +1,188 @@
+/* ==========================================================================
+   Bsabity Furniture Workshop - Responsive Media Queries
+   ========================================================================== */
+
+/* Wide Desktops & Tablets (Max Width: 1024px) */
+@media (max-width: 1024px) {
+    .hero-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        text-align: center;
+    }
+
+    .hero-content {
+        max-width: 100%;
+    }
+
+    .hero-actions {
+        justify-content: center;
+    }
+
+    .hero-img {
+        height: 400px;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .about-img {
+        height: 380px;
+    }
+
+    .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .admin-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+/* Medium Tablets & Large Mobiles (Max Width: 768px) */
+@media (max-width: 768px) {
+    /* Header & Mobile Drawer Navigation */
+    .menu-toggle {
+        display: flex;
+        font-size: 1.5rem;
+    }
+
+    .nav-links {
+        position: fixed;
+        top: 5rem;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 5rem);
+        background-color: var(--bg-primary);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 3rem 2rem;
+        gap: 2rem;
+        border-top: 1px solid var(--border-color);
+        transition: var(--transition-smooth);
+        z-index: 999;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .nav-links.active {
+        left: 0;
+    }
+
+    .nav-links li {
+        width: 100%;
+    }
+
+    .nav-links a {
+        font-size: 1.25rem;
+        width: 100%;
+        display: block;
+    }
+
+    /* Sections */
+    section {
+        padding: 4rem 1.5rem;
+    }
+
+    .hero-title {
+        font-size: 2.75rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-auto-rows: 220px;
+    }
+
+    .gallery-item.wide {
+        grid-column: span 1;
+    }
+
+    .gallery-item.tall {
+        grid-row: span 1;
+    }
+
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 2.5rem;
+    }
+
+    .contact-form-wrapper {
+        padding: 2rem 1.5rem;
+    }
+
+    .lightbox-close {
+        top: 1rem;
+        right: 1rem;
+        font-size: 2rem;
+    }
+
+    .lightbox-nav {
+        font-size: 2rem;
+    }
+
+    .lightbox-prev {
+        left: 0.5rem;
+    }
+
+    .lightbox-next {
+        right: 0.5rem;
+    }
+}
+
+/* Small Mobiles (Max Width: 480px) */
+@media (max-width: 480px) {
+    .nav-container {
+        padding: 1rem 1.5rem;
+    }
+
+    .logo-text {
+        font-size: 1.25rem;
+    }
+
+    .hero-title {
+        font-size: 2.25rem;
+    }
+
+    .hero-desc {
+        font-size: 1rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .testimonial-quote {
+        font-size: 1.25rem;
+    }
+
+    .testimonial-quote::before {
+        font-size: 3rem;
+        top: -1.75rem;
+    }
+
+    .scroll-top {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        width: 44px;
+        height: 44px;
+    }
+}

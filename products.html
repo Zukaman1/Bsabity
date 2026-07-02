@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Furniture Catalog & Price List | Bsabity Furniture Workshop Rwanda</title>
+    <meta name="description" content="Browse our complete furniture catalog and price list in Rwanda. View standard rates for handcrafted metal beds, wooden tables, custom office cabinets, and wardrobes.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/icons/icon-72x72.png">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div class="loader-wrapper" id="loader-wrapper">
+        <div class="loader-logo">Bsabity<span>Furniture</span></div>
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header>
+        <nav class="nav-container">
+            <a href="index.html" class="logo-container" aria-label="Bsabity Home">
+                <i class="fas fa-couch logo-icon"></i>
+                <div class="logo-text">Bsabity<span>Furniture</span></div>
+            </a>
+
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html" data-i18n="nav-home">Home</a></li>
+                <li><a href="about.html" data-i18n="nav-about">About Us</a></li>
+                <li><a href="services.html" data-i18n="nav-services">Services</a></li>
+                <li><a href="gallery.html" data-i18n="nav-gallery">Gallery</a></li>
+                <li><a href="products.html" class="active" data-i18n="nav-products">Products</a></li>
+                <li><a href="contact.html" data-i18n="nav-contact">Contact Us</a></li>
+                <li><a href="admin.html" data-i18n="nav-admin">Admin Panel</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="btn-icon" id="lang-toggle" aria-label="Change Language">
+                    <i class="fas fa-globe"></i> EN
+                </button>
+                <button class="btn-icon" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn-icon menu-toggle" id="menu-toggle" aria-label="Open Mobile Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Page Header Banner -->
+        <section class="hero-section" style="min-height: 40vh; padding: 6rem 2rem 3rem; background-color: var(--bg-secondary);">
+            <div class="section-container text-center">
+                <span class="hero-subtitle" data-i18n="products-sub">Catalog</span>
+                <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 1rem;">Collections & Pricing</h1>
+                <p class="hero-desc" style="max-width: 700px; margin: 0 auto;">Standard pricing structures for our premium designs. Click any item to order or customize directly via WhatsApp.</p>
+            </div>
+        </section>
+
+        <!-- Product Cards Grid -->
+        <section class="products-section">
+            <div class="section-container">
+                <div class="section-header" style="margin-bottom: 3rem;">
+                    <span class="section-subtitle">Showcase</span>
+                    <h2 class="section-title" data-i18n="products-title">Featured Products</h2>
+                </div>
+                
+                <div class="products-grid" id="catalog-products-grid">
+                    <!-- Loaded dynamically via JavaScript local storage synchronization -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Editable Price List Table -->
+        <section class="price-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <span class="section-subtitle">Price Guide</span>
+                    <h2 class="section-title">Standard Price List</h2>
+                    <p class="section-desc">Editable from your Admin Dashboard. Real-time rates for base timber/welding configurations.</p>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="price-table">
+                        <thead>
+                            <tr>
+                                <th>Furniture Item Name</th>
+                                <th>Category</th>
+                                <th>Standard Price (RWF)</th>
+                                <th>Availability Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="catalog-pricing-table">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <button class="scroll-top" id="scroll-top" aria-label="Scroll to top"><i class="fas fa-chevron-up"></i></button>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-about">
+                <div class="logo-container">
+                    <i class="fas fa-couch logo-icon"></i>
+                    <div class="logo-text">Bsabity<span>Furniture</span></div>
+                </div>
+                <p class="footer-desc">Premium metal fabrications and custom wooden furniture workshop based in Rwanda, serving clients across East Africa since 2012.</p>
+                <div class="footer-socials">
+                    <a href="#" class="footer-social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                    <a href="https://wa.me/250783847520" class="footer-social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="services.html">Our Services</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Our Manufacture</h3>
+                <ul class="footer-links">
+                    <li><a href="services.html">Metal & Wooden Beds</a></li>
+                    <li><a href="services.html">Custom Office Tables</a></li>
+                    <li><a href="services.html">Solid Wood Dining Sets</a></li>
+                    <li><a href="services.html">Modular Wardrobes</a></li>
+                    <li><a href="services.html">Custom Cabinetry</a></li>
+                    <li><a href="services.html">Interior & Outdoor Sets</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Bsabity Furniture Workshop. All Rights Reserved.</p>
+            <p>Made in Kigali, Rwanda.</p>
+        </div>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="js/app.js"></script>
+    <script src="js/google-drive.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDynamicProducts();
+        });
+
+        function getDiscountedPrice(priceStr, discountPercent) {
+            if (!priceStr) return null;
+            const discount = parseInt(discountPercent, 10);
+            if (isNaN(discount) || discount <= 0) return null;
+            
+            const numericPart = parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
+            if (isNaN(numericPart)) return null;
+            
+            const discountedNum = Math.round(numericPart * (1 - discount / 100));
+            return discountedNum.toLocaleString() + " RWF";
+        }
+
+        async function renderDynamicProducts() {
+            const gridContainer = document.getElementById('catalog-products-grid');
+            const tableContainer = document.getElementById('catalog-pricing-table');
+
+            if (!gridContainer || !tableContainer) return;
+
+            gridContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem;">Loading catalog...</div>';
+            tableContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Loading price list...</td></tr>';
+
+            try {
+                // Load products via Google Drive or LocalStorage fallback
+                const products = await loadProducts();
+                
+                // Render Product Cards
+                gridContainer.innerHTML = '';
+                products.forEach(prod => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    
+                    const isOutOfStock = prod.availability === 'Custom Build';
+                    const badgeClass = isOutOfStock ? 'product-badge out-of-stock' : 'product-badge';
+                    
+                    const discount = parseInt(prod.discount, 10);
+                    let priceDisplay = `<span class="product-price">${prod.price}</span>`;
+                    let orderPrice = prod.price;
+                    let badgeHtml = `<span class="${badgeClass}">${prod.availability}</span>`;
+
+                    // If discount is set, show strike-through and modern green highlighted price
+                    if (discount > 0) {
+                        const discountedNum = getDiscountedPrice(prod.price, discount);
+                        if (discountedNum) {
+                            orderPrice = discountedNum;
+                            priceDisplay = `
+                                <div style="display: flex; flex-direction: column;">
+                                    <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.1rem;">${prod.price}</span>
+                                    <span class="product-price" style="color: #10B981; font-weight: bold;">${discountedNum}</span>
+                                </div>
+                            `;
+                            // Highlighting cheaper items in a beautiful green discount badge
+                            badgeHtml = `
+                                <span class="${badgeClass}">${prod.availability}</span>
+                                <span class="product-badge" style="background-color: #10B981; top: 2.7rem; color: white; border: none; font-weight: bold; animation: pulse 2s infinite;">${discount}% OFF</span>
+                            `;
+                        }
+                    }
+
+                    const whatsappUrl = `https://wa.me/250783847520?text=Hello%20Bsabity%20Furniture,%20I%20would%20like%20to%20order%20the%20${encodeURIComponent(prod.name)}%20for%20${encodeURIComponent(orderPrice)}.`;
+
+                    const catObj = (window.FURNITURE_CATEGORIES || []).find(c => c.id === prod.category);
+                    const categoryName = catObj ? catObj.name : prod.category;
+
+                    card.innerHTML = `
+                        <div class="product-img-wrapper">
+                            <img class="product-card-img" src="${prod.image || 'https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=600'}" alt="${prod.name}" loading="lazy">
+                            ${badgeHtml}
+                        </div>
+                        <div class="product-info">
+                            <span class="product-category">${categoryName}</span>
+                            <h3 class="product-name">${prod.name}</h3>
+                            <p class="product-desc">${prod.description}</p>
+                            <div class="product-footer">
+                                ${priceDisplay}
+                                <a href="${whatsappUrl}" target="_blank" rel="noopener" class="btn btn-primary btn-sm"><i class="fab fa-whatsapp"></i> Order</a>
+                            </div>
+                        </div>
+                    `;
+                    gridContainer.appendChild(card);
+                });
+
+                // Render Pricing Table
+                tableContainer.innerHTML = '';
+                products.forEach(prod => {
+                    const row = document.createElement('tr');
+                    
+                    const discount = parseInt(prod.discount, 10);
+                    let priceHtml = `<span class="price-tag-badge" style="font-size: 1rem; padding: 0.4rem 1rem;">${prod.price}</span>`;
+                    let orderPrice = prod.price;
+
+                    if (discount > 0) {
+                        const discountedNum = getDiscountedPrice(prod.price, discount);
+                        if (discountedNum) {
+                            orderPrice = discountedNum;
+                            priceHtml = `
+                                <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.2rem;">
+                                    <span style="text-decoration: line-through; color: var(--text-muted); font-size: 0.8rem;">${prod.price}</span>
+                                    <span class="price-tag-badge" style="font-size: 0.95rem; padding: 0.3rem 0.8rem; background-color: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid #10B981; font-weight: bold;">
+                                        ${discountedNum} <span style="font-size: 0.75rem; background-color: #10B981; color: white; padding: 1px 4px; border-radius: 3px; margin-left: 4px;">${discount}% OFF</span>
+                                    </span>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    const whatsappUrl = `https://wa.me/250783847520?text=Hello%20Bsabity%20Furniture,%20I%20would%20like%20to%20inquire%20about%20ordering%20the%20${encodeURIComponent(prod.name)}%20for%20${encodeURIComponent(orderPrice)}.`;
+                    
+                    const catObj = (window.FURNITURE_CATEGORIES || []).find(c => c.id === prod.category);
+                    const categoryName = catObj ? catObj.name : prod.category;
+
+                    row.innerHTML = `
+                        <td><strong>${prod.name}</strong></td>
+                        <td style="text-transform: uppercase; font-size: 0.8rem; font-weight: bold; color: var(--accent);">${categoryName}</td>
+                        <td>${priceHtml}</td>
+                        <td><strong style="color: ${prod.availability === 'In Stock' ? '#10B981' : '#F59E0B'}">${prod.availability}</strong></td>
+                        <td><a href="${whatsappUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;"><i class="fab fa-whatsapp"></i> Inquire</a></td>
+                    `;
+                    tableContainer.appendChild(row);
+                });
+            } catch (err) {
+                console.error("Error displaying products list:", err);
+                gridContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: red;">Failed to load catalog products. Please reload or check back soon.</div>';
+            }
+        }
+    </script>
+</body>
+</html>

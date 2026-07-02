@@ -1,0 +1,9 @@
+# ==========================================================================
+# Bsabity Furniture Workshop - Search Engine Optimization Index
+# ==========================================================================
+
+User-agent: *
+Allow: /
+Disallow: /admin.html  # Do not crawl admin management login credentials
+
+Sitemap: https://bsabity-furniture.rw/sitemap.xml

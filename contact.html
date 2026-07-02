@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us | Bsabity Furniture Workshop Rwanda</title>
+    <meta name="description" content="Get in touch with Bsabity Furniture Workshop in Rwanda. Contact us via phone at +250 783 847 520, email Bsabity@gmail.com, or visit our physical workshop in Kigali.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="assets/icons/icon-72x72.png">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <!-- Loading Screen -->
+    <div class="loader-wrapper" id="loader-wrapper">
+        <div class="loader-logo">Bsabity<span>Furniture</span></div>
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Header Navigation -->
+    <header>
+        <nav class="nav-container">
+            <a href="index.html" class="logo-container" aria-label="Bsabity Home">
+                <i class="fas fa-couch logo-icon"></i>
+                <div class="logo-text">Bsabity<span>Furniture</span></div>
+            </a>
+
+            <ul class="nav-links" id="nav-links">
+                <li><a href="index.html" data-i18n="nav-home">Home</a></li>
+                <li><a href="about.html" data-i18n="nav-about">About Us</a></li>
+                <li><a href="services.html" data-i18n="nav-services">Services</a></li>
+                <li><a href="gallery.html" data-i18n="nav-gallery">Gallery</a></li>
+                <li><a href="products.html" data-i18n="nav-products">Products</a></li>
+                <li><a href="contact.html" class="active" data-i18n="nav-contact">Contact Us</a></li>
+                <li><a href="admin.html" data-i18n="nav-admin">Admin Panel</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="btn-icon" id="lang-toggle" aria-label="Change Language">
+                    <i class="fas fa-globe"></i> EN
+                </button>
+                <button class="btn-icon" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn-icon menu-toggle" id="menu-toggle" aria-label="Open Mobile Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Page Header Banner -->
+        <section class="hero-section" style="min-height: 40vh; padding: 6rem 2rem 3rem; background-color: var(--bg-secondary);">
+            <div class="section-container text-center">
+                <span class="hero-subtitle" data-i18n="contact-sub">Get in Touch</span>
+                <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 1rem;">Let's Connect</h1>
+                <p class="hero-desc" style="max-width: 700px; margin: 0 auto;">Speak directly with our wood carpenters and metal fabrication technicians.</p>
+            </div>
+        </section>
+
+        <!-- Interactive Contact Section -->
+        <section class="contact-section">
+            <div class="section-container">
+                <div class="contact-grid">
+                    
+                    <!-- Contact Cards Details -->
+                    <div class="contact-info-cards">
+                        <span class="section-subtitle">Workshop Contact</span>
+                        <h2>Direct Inquiries</h2>
+                        <p class="section-desc mb-4">We are available Monday to Saturday, 8:00 AM to 6:00 PM (Kigali local time). Stop by our physical location for wood selection or steel grade testing.</p>
+
+                        <div class="contact-info-card">
+                            <div class="contact-card-icon"><i class="fas fa-phone-alt"></i></div>
+                            <div class="contact-card-details">
+                                <h3 data-i18n="contact-phone-sub">Call Workshop</h3>
+                                <p>Operational Support:</p>
+                                <a href="tel:+250783847520" style="font-weight: 700; font-size: 1.1rem; color: var(--accent);">+250 783 847 520</a>
+                            </div>
+                        </div>
+
+                        <div class="contact-info-card">
+                            <div class="contact-card-icon"><i class="fas fa-envelope"></i></div>
+                            <div class="contact-card-details">
+                                <h3 data-i18n="contact-email-sub">Send Email</h3>
+                                <p>Corporate / Government Quotes:</p>
+                                <a href="mailto:Bsabity@gmail.com" style="font-weight: 700; font-size: 1.1rem; color: var(--accent);">Bsabity@gmail.com</a>
+                            </div>
+                        </div>
+
+                        <div class="contact-info-card">
+                            <div class="contact-card-icon"><i class="fab fa-whatsapp"></i></div>
+                            <div class="contact-card-details">
+                                <h3 data-i18n="contact-whatsapp-sub">Chat on WhatsApp</h3>
+                                <p>Fast replies on design pricing:</p>
+                                <a href="https://wa.me/250783847520" target="_blank" rel="noopener" style="font-weight: 700; font-size: 1.1rem; color: var(--accent);">Launch WhatsApp Chat <i class="fas fa-external-link-alt"></i></a>
+                            </div>
+                        </div>
+
+                        <!-- Google Maps Vector / CSS Styled Placeholder -->
+                        <div class="map-placeholder-container">
+                            <div style="background-color: var(--bg-secondary); width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 2rem;">
+                                <i class="fas fa-map-marked-alt" style="font-size: 2.5rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                                <h4 style="margin-bottom: 0.5rem; font-family: var(--font-heading);">Bsabity Physical Workshop</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 320px;">Kigali Workshop District, Sector Gikondo, Kigali, Rwanda.</p>
+                                <a href="https://maps.google.com/?q=Kigali+Gikondo" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="margin-top: 1rem; font-size: 0.8rem; padding: 0.4rem 1rem;"><i class="fas fa-directions"></i> Get Directions</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form Box -->
+                    <div class="contact-form-wrapper">
+                        <h3 class="form-title" data-i18n="contact-form-title">Send a Message</h3>
+                        <form id="contact-form-page">
+                            <div class="form-group">
+                                <label class="form-label" for="page-name" data-i18n="form-name">Your Name</label>
+                                <input class="form-control" type="text" id="page-name" required placeholder="Enter your full name">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="page-email" data-i18n="form-email">Your Email Address</label>
+                                <input class="form-control" type="email" id="page-email" required placeholder="example@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="page-phone" data-i18n="form-phone">Phone Number</label>
+                                <input class="form-control" type="tel" id="page-phone" required placeholder="e.g. +250 783 847 520">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="page-msg" data-i18n="form-msg">Project Details</label>
+                                <textarea class="form-control" id="page-msg" rows="5" required placeholder="Specify design measurements, metal/wood styles, and desired finish color..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-full" data-i18n="btn-send">Submit Inquiry <i class="fas fa-paper-plane"></i></button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <button class="scroll-top" id="scroll-top" aria-label="Scroll to top"><i class="fas fa-chevron-up"></i></button>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-grid">
+            <div class="footer-about">
+                <div class="logo-container">
+                    <i class="fas fa-couch logo-icon"></i>
+                    <div class="logo-text">Bsabity<span>Furniture</span></div>
+                </div>
+                <p class="footer-desc">Premium metal fabrications and custom wooden furniture workshop based in Rwanda, serving clients across East Africa since 2012.</p>
+                <div class="footer-socials">
+                    <a href="#" class="footer-social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="footer-social-link" aria-label="Pinterest"><i class="fab fa-pinterest"></i></a>
+                    <a href="https://wa.me/250783847520" class="footer-social-link" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="services.html">Our Services</a></li>
+                    <li><a href="gallery.html">Gallery</a></li>
+                    <li><a href="products.html">Products</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Our Manufacture</h3>
+                <ul class="footer-links">
+                    <li><a href="services.html">Metal & Wooden Beds</a></li>
+                    <li><a href="services.html">Custom Office Tables</a></li>
+                    <li><a href="services.html">Solid Wood Dining Sets</a></li>
+                    <li><a href="services.html">Modular Wardrobes</a></li>
+                    <li><a href="services.html">Custom Cabinetry</a></li>
+                    <li><a href="services.html">Interior & Outdoor Sets</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Bsabity Furniture Workshop. All Rights Reserved.</p>
+            <p>Made in Kigali, Rwanda.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        const cPageForm = document.getElementById('contact-form-page');
+        if (cPageForm) {
+            cPageForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                showAlertBanner("Thank you! Your direct workshop inquiry has been sent. We'll be in touch.", "success");
+                cPageForm.reset();
+            });
+        }
+    </script>
+</body>
+</html>
