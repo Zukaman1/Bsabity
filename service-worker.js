@@ -19,7 +19,7 @@ const ASSETS_TO_CACHE = [
   '/js/app.js',
   '/js/gallery.js',
   '/js/admin.js',
-  '/js/google-drive.js',
+  '/js/firebase.js',
   '/manifest.json'
 ];
 

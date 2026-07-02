@@ -295,4 +295,34 @@ window.firebase = {
 
 // Auto-seed if empty when database loads
 seedInitialDatabase();
+
+// Legacy backward-compatibility wrapper helpers (previously in google-drive.js)
+window.loadProducts = async function() {
+    return new Promise((resolve) => {
+        const checkFirebase = setInterval(() => {
+            if (window.firebase && window.firebase.onProductsUpdate) {
+                clearInterval(checkFirebase);
+                const unsubscribe = window.firebase.onProductsUpdate((products) => {
+                    unsubscribe();
+                    resolve(products);
+                });
+            }
+        }, 50);
+    });
+};
+
+window.loadGallery = async function() {
+    return new Promise((resolve) => {
+        const checkFirebase = setInterval(() => {
+            if (window.firebase && window.firebase.onGalleryUpdate) {
+                clearInterval(checkFirebase);
+                const unsubscribe = window.firebase.onGalleryUpdate((gallery) => {
+                    unsubscribe();
+                    resolve(gallery);
+                });
+            }
+        }, 50);
+    });
+};
+
 console.log("Firebase initialized successfully with real-time listeners and fallback systems.");
