@@ -1,16 +1,18 @@
 /**
  * ==========================================================================
- * Bsabity Furniture Workshop - Admin Dashboard Operations
+ * Bsabity Furniture Workshop - Real-time Firebase Admin Dashboard
  * ==========================================================================
  */
 
 let cachedAdminProducts = [];
 let cachedAdminGallery = [];
+let productsUnsubscribe = null;
+let galleryUnsubscribe = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAdminAuthentication();
     initAdminFormHandlers();
-    initGoogleDriveSettingsHandler();
+    initFirebaseControlCenter();
 });
 
 /**
@@ -27,10 +29,12 @@ function checkAdminAuthentication() {
         loginSection.style.display = 'none';
         dashboardSection.style.display = 'block';
         
-        // Dynamically populate all category select dropdowns
+        // Populate all categories
         populateCategorySelectors();
         
-        loadAdminData();
+        // Subscribe to real-time updates
+        startRealtimeAdminSync();
+        
         initSearchAndFilters();
         initBulkSelectionHandlers();
     } else {
@@ -41,7 +45,52 @@ function checkAdminAuthentication() {
 }
 
 /**
- * Populates all form dropdown selectors dynamically from the global category config
+ * Subscribes to real-time Firestore database updates
+ */
+function startRealtimeAdminSync() {
+    // Unsubscribe from any previous listeners to avoid duplicates
+    if (productsUnsubscribe) productsUnsubscribe();
+    if (galleryUnsubscribe) galleryUnsubscribe();
+
+    const tableBodyProducts = document.getElementById('admin-products-table');
+    if (tableBodyProducts) {
+        tableBodyProducts.innerHTML = '<tr><td colspan="4" class="text-center"><div class="loader-spinner" style="margin:0 auto;"></div><p style="margin-top:0.5rem;">Connecting to real-time catalog stream...</p></td></tr>';
+    }
+
+    const tableBodyGallery = document.getElementById('admin-gallery-table');
+    if (tableBodyGallery) {
+        tableBodyGallery.innerHTML = '<tr><td colspan="3" class="text-center"><div class="loader-spinner" style="margin:0 auto;"></div><p style="margin-top:0.5rem;">Connecting to real-time asset stream...</p></td></tr>';
+    }
+
+    // 1. Listen to real-time products
+    const checkFirebaseActive = setInterval(() => {
+        if (window.firebase && window.firebase.onProductsUpdate) {
+            clearInterval(checkFirebaseActive);
+            
+            // Listen to Products
+            productsUnsubscribe = window.firebase.onProductsUpdate((products) => {
+                cachedAdminProducts = products;
+                renderAdminProducts(products);
+                
+                // Keep the search and filters applied if user typed something
+                const searchInput = document.getElementById('admin-search-products');
+                const filterSelect = document.getElementById('admin-filter-category');
+                if ((searchInput && searchInput.value) || (filterSelect && filterSelect.value !== 'all')) {
+                    applySearchAndFilters();
+                }
+            });
+
+            // Listen to Gallery
+            galleryUnsubscribe = window.firebase.onGalleryUpdate((images) => {
+                cachedAdminGallery = images;
+                renderAdminGallery(images);
+            });
+        }
+    }, 50);
+}
+
+/**
+ * Populates all category selectors
  */
 function populateCategorySelectors() {
     const categories = window.FURNITURE_CATEGORIES || [];
@@ -96,53 +145,35 @@ function initLoginHandler() {
  * Logs the administrator out safely
  */
 function logoutAdmin() {
+    // Unsubscribe listeners
+    if (productsUnsubscribe) {
+        productsUnsubscribe();
+        productsUnsubscribe = null;
+    }
+    if (galleryUnsubscribe) {
+        galleryUnsubscribe();
+        galleryUnsubscribe = null;
+    }
+    
     localStorage.removeItem('bsabity_admin_auth');
     showAlertBanner("Successfully logged out.", "success");
     checkAdminAuthentication();
 }
+window.logoutAdmin = logoutAdmin;
 
 /**
- * Loads products and gallery images to display inside dashboard tables.
- */
-function loadAdminData() {
-    loadAdminProducts();
-    loadAdminGallery();
-}
-
-/**
- * Utility: Calculates discounted price from raw price string and percentage
+ * Calculates discounted price
  */
 function getDiscountedPrice(priceStr, discountPercent) {
     if (!priceStr) return null;
     const discount = parseInt(discountPercent, 10);
     if (isNaN(discount) || discount <= 0) return null;
     
-    // Extract numbers from price string (e.g. "180,000 RWF" -> 180000)
     const numericPart = parseInt(priceStr.replace(/[^0-9]/g, ''), 10);
     if (isNaN(numericPart)) return null;
     
     const discountedNum = Math.round(numericPart * (1 - discount / 100));
     return discountedNum.toLocaleString() + " RWF";
-}
-
-/**
- * CRUD Operations: PRODUCTS
- */
-async function loadAdminProducts() {
-    const tableBody = document.getElementById('admin-products-table');
-    const badge = document.getElementById('product-count-badge');
-    if (!tableBody) return;
-
-    tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Loading product catalog...</td></tr>';
-
-    try {
-        const products = await loadProducts(); // Fetch globally from Google Drive or local fallback
-        cachedAdminProducts = products;
-        renderAdminProducts(products);
-    } catch (err) {
-        console.error("Error loading admin products:", err);
-        tableBody.innerHTML = '<tr><td colspan="4" class="text-center" style="color: red;">Failed to load catalog. Check connection.</td></tr>';
-    }
 }
 
 /**
@@ -160,7 +191,7 @@ function renderAdminProducts(products) {
     }
 
     if (products.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No matching products found.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center">No matching products found in database.</td></tr>';
         return;
     }
 
@@ -179,14 +210,18 @@ function renderAdminProducts(products) {
             }
         }
 
-        // Get pretty name of the category from global mapping
         const catObj = (window.FURNITURE_CATEGORIES || []).find(c => c.id === prod.category);
         const categoryName = catObj ? catObj.name : prod.category;
 
         row.innerHTML = `
             <td>
-                <strong>${prod.name}</strong><br>
-                <small style="color: var(--text-secondary); text-transform: uppercase;">${categoryName}</small>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <img src="${prod.image || 'https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=150'}" alt="" style="width: 42px; height: 42px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);">
+                    <div>
+                        <strong>${prod.name}</strong><br>
+                        <small style="color: var(--text-secondary); text-transform: uppercase;">${categoryName}</small>
+                    </div>
+                </div>
             </td>
             <td>${priceDisplay}</td>
             <td><span class="price-tag-badge">${prod.availability}</span></td>
@@ -202,94 +237,108 @@ function renderAdminProducts(products) {
 }
 
 /**
- * Live search and filter implementation
+ * Filter / Search Trigger
  */
+function applySearchAndFilters() {
+    const searchInput = document.getElementById('admin-search-products');
+    const filterSelect = document.getElementById('admin-filter-category');
+
+    const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const category = filterSelect ? filterSelect.value : 'all';
+
+    const filtered = cachedAdminProducts.filter(p => {
+        const matchesSearch = p.name.toLowerCase().includes(query) || p.description.toLowerCase().includes(query);
+        const matchesCategory = category === 'all' || p.category === category;
+        return matchesSearch && matchesCategory;
+    });
+
+    renderAdminProducts(filtered);
+}
+
 function initSearchAndFilters() {
     const searchInput = document.getElementById('admin-search-products');
     const filterSelect = document.getElementById('admin-filter-category');
 
-    const triggerFilter = () => {
-        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const category = filterSelect ? filterSelect.value : 'all';
-
-        const filtered = cachedAdminProducts.filter(p => {
-            const matchesSearch = p.name.toLowerCase().includes(query) || p.description.toLowerCase().includes(query);
-            const matchesCategory = category === 'all' || p.category === category;
-            return matchesSearch && matchesCategory;
-        });
-
-        renderAdminProducts(filtered);
-    };
-
-    if (searchInput) searchInput.addEventListener('input', triggerFilter);
-    if (filterSelect) filterSelect.addEventListener('change', triggerFilter);
+    if (searchInput) searchInput.addEventListener('input', applySearchAndFilters);
+    if (filterSelect) filterSelect.addEventListener('change', applySearchAndFilters);
 }
 
 /**
- * Admin Forms submission handling (Product and Gallery)
+ * Forms submission handlers
  */
 function initAdminFormHandlers() {
     const productForm = document.getElementById('admin-product-form');
     if (productForm) {
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const idInput = document.getElementById('product-id');
-            const nameInput = document.getElementById('product-name');
-            const categorySelect = document.getElementById('product-category');
-            const descInput = document.getElementById('product-desc');
-            const priceInput = document.getElementById('product-price');
-            const discountInput = document.getElementById('product-discount');
-            const availSelect = document.getElementById('product-avail');
-            const imageFileInput = document.getElementById('product-image-file');
-
-            let imageBase64 = null;
-            if (imageFileInput && imageFileInput.files.length > 0) {
-                imageBase64 = await convertFileToBase64(imageFileInput.files[0]);
-            }
-
-            const products = await loadProducts();
-
-            if (idInput && idInput.value) {
-                // UPDATE PRODUCT
-                const index = products.findIndex(p => p.id === idInput.value);
-                if (index !== -1) {
-                    products[index].name = nameInput.value;
-                    products[index].category = categorySelect.value;
-                    products[index].description = descInput.value;
-                    products[index].price = priceInput.value;
-                    products[index].discount = discountInput.value ? parseInt(discountInput.value, 10) : 0;
-                    products[index].availability = availSelect.value;
-                    if (imageBase64) {
-                        products[index].image = imageBase64;
-                    }
-                    showAlertBanner("Product updated successfully!", "success");
-                }
-            } else {
-                // CREATE PRODUCT
-                const newProduct = {
-                    id: "prod_" + Date.now(),
-                    name: nameInput.value,
-                    category: categorySelect.value,
-                    description: descInput.value,
-                    price: priceInput.value,
-                    discount: discountInput.value ? parseInt(discountInput.value, 10) : 0,
-                    availability: availSelect.value,
-                    image: imageBase64 || "https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=600"
-                };
-                products.push(newProduct);
-                showAlertBanner("New product added to catalog!", "success");
-            }
-
-            // Save globally and trigger sync with Google Drive
-            await saveProducts(products);
-            productForm.reset();
-            if (idInput) idInput.value = '';
             
-            // Toggle form title back to "Add"
-            const titleEl = document.getElementById('form-action-title');
-            if (titleEl) titleEl.innerHTML = '<i class="fas fa-box-open" style="color: #059669; margin-right: 0.5rem;"></i> Add New Product';
+            const submitBtn = productForm.querySelector('button[type="submit"]');
+            const originalBtnHtml = submitBtn.innerHTML;
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
-            loadAdminProducts();
+            try {
+                const idInput = document.getElementById('product-id');
+                const nameInput = document.getElementById('product-name');
+                const categorySelect = document.getElementById('product-category');
+                const descInput = document.getElementById('product-desc');
+                const priceInput = document.getElementById('product-price');
+                const discountInput = document.getElementById('product-discount');
+                const availSelect = document.getElementById('product-avail');
+                const imageFileInput = document.getElementById('product-image-file');
+
+                let imageUrl = null;
+                
+                // Upload new image to Storage if selected
+                if (imageFileInput && imageFileInput.files.length > 0) {
+                    const file = imageFileInput.files[0];
+                    showAlertBanner(`Uploading "${file.name}" to Cloud Storage...`, "success");
+                    const uploadResult = await window.firebase.uploadImage(file, file.name);
+                    imageUrl = uploadResult.url;
+                }
+
+                const productPayload = {
+                    name: nameInput.value.trim(),
+                    category: categorySelect.value,
+                    description: descInput.value.trim(),
+                    price: priceInput.value.trim(),
+                    discount: discountInput.value ? parseInt(discountInput.value, 10) : 0,
+                    availability: availSelect.value
+                };
+
+                if (imageUrl) {
+                    productPayload.image = imageUrl;
+                }
+
+                if (idInput && idInput.value) {
+                    // Update Product in Firestore
+                    await window.firebase.updateProduct(idInput.value, productPayload);
+                    showAlertBanner("Product details updated in real-time!", "success");
+                } else {
+                    // Create Product in Firestore
+                    if (!imageUrl) {
+                        // Unsplash design-conscious default fallbacks if no image was chosen
+                        productPayload.image = "https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=600";
+                    }
+                    await window.firebase.addProduct(productPayload);
+                    showAlertBanner("New masterpiece added to Firebase database!", "success");
+                }
+
+                productForm.reset();
+                if (idInput) idInput.value = '';
+                
+                // Restore Form Action Name
+                const titleEl = document.getElementById('form-action-title');
+                if (titleEl) titleEl.innerHTML = '<i class="fas fa-box-open" style="color: #059669; margin-right: 0.5rem;"></i> Add New Product';
+
+            } catch (err) {
+                console.error("Error saving product: ", err);
+                showAlertBanner("Failed to save product details.", "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            }
         });
     }
 
@@ -297,6 +346,7 @@ function initAdminFormHandlers() {
     if (galleryForm) {
         galleryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            
             const titleInput = document.getElementById('gallery-img-title');
             const categorySelect = document.getElementById('gallery-img-category');
             const imageFileInput = document.getElementById('gallery-img-file');
@@ -310,7 +360,7 @@ function initAdminFormHandlers() {
             const totalFiles = files.length;
             const titleBase = titleInput.value.trim() || "Workshop Creation";
 
-            // Show and reset progress elements
+            // Show progress indicator
             const progressContainer = document.getElementById('upload-progress-container');
             const progressBar = document.getElementById('upload-progress-bar');
             const progressText = document.getElementById('upload-progress-text');
@@ -318,54 +368,49 @@ function initAdminFormHandlers() {
 
             if (progressContainer) progressContainer.style.display = 'block';
 
-            let customGallery = JSON.parse(localStorage.getItem('bsabity_custom_gallery')) || [];
             let successfulUploads = 0;
 
             for (let i = 0; i < totalFiles; i++) {
                 const file = files[i];
                 const fileTitle = (i === 0) ? titleBase : file.name.split('.')[0].replace(/[-_]/g, ' ');
 
-                // Update progress bar status
+                // Update progress metrics
                 const percent = Math.round((i / totalFiles) * 100);
                 if (progressBar) progressBar.style.width = `${percent}%`;
                 if (progressText) progressText.textContent = `Uploading item ${i + 1} of ${totalFiles}: "${fileTitle}"...`;
                 if (progressPercent) progressPercent.textContent = `${percent}%`;
 
                 try {
-                    // Upload to Google Drive directly with title and category
-                    const uploadedAsset = await uploadImage(file, fileTitle, categorySelect.value);
+                    // Upload directly to Cloud Storage
+                    const uploadResult = await window.firebase.uploadImage(file, file.name);
 
+                    // Insert metadata into Firestore gallery collection
                     const newGalleryItem = {
-                        id: uploadedAsset.id,
                         title: fileTitle,
                         category: categorySelect.value,
-                        url: uploadedAsset.url,
-                        thumbnail: uploadedAsset.thumbnail
+                        url: uploadResult.url,
+                        thumbnail: uploadResult.url
                     };
 
-                    customGallery.push(newGalleryItem);
+                    await window.firebase.addGalleryItem(newGalleryItem);
                     successfulUploads++;
                 } catch (error) {
-                    console.error(`Upload error for file "${file.name}":`, error);
+                    console.error(`Upload failed for file "${file.name}":`, error);
                 }
             }
 
-            // Final progress wrap-up
+            // Finished progress wrap-up
             if (progressBar) progressBar.style.width = '100%';
             if (progressPercent) progressPercent.textContent = '100%';
-            if (progressText) progressText.textContent = `Completed! ${successfulUploads} of ${totalFiles} images uploaded successfully.`;
-
-            // Save custom gallery cache locally
-            localStorage.setItem('bsabity_custom_gallery', JSON.stringify(customGallery));
+            if (progressText) progressText.textContent = `Upload completed! ${successfulUploads} of ${totalFiles} images uploaded to Firebase Storage.`;
 
             setTimeout(() => {
                 if (progressContainer) progressContainer.style.display = 'none';
                 if (progressBar) progressBar.style.width = '0%';
                 if (progressPercent) progressPercent.textContent = '0%';
                 
-                showAlertBanner(`Success! ${successfulUploads} images uploaded to Google Drive.`, "success");
+                showAlertBanner(`Success! ${successfulUploads} assets synchronized to Firebase Storage.`, "success");
                 galleryForm.reset();
-                loadAdminGallery();
             }, 1500);
         });
     }
@@ -374,9 +419,8 @@ function initAdminFormHandlers() {
 /**
  * Edit Product Form Population Trigger
  */
-async function editProductPrompt(id) {
-    const products = await loadProducts();
-    const prod = products.find(p => p.id === id);
+function editProductPrompt(id) {
+    const prod = cachedAdminProducts.find(p => p.id === id);
     if (!prod) return;
 
     document.getElementById('product-id').value = prod.id;
@@ -399,34 +443,23 @@ window.editProductPrompt = editProductPrompt;
  * Deletes a product
  */
 async function deleteProduct(id) {
-    if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) return;
+    if (!confirm("Are you sure you want to delete this product? This action is permanent.")) return;
 
-    let products = await loadProducts();
-    products = products.filter(p => p.id !== id);
-    await saveProducts(products);
-
-    showAlertBanner("Product deleted successfully.", "success");
-    loadAdminProducts();
+    try {
+        const prod = cachedAdminProducts.find(p => p.id === id);
+        // If product has custom Firebase Storage image, delete it to save space!
+        if (prod && prod.image) {
+            await window.firebase.deleteImageByUrl(prod.image);
+        }
+        
+        await window.firebase.deleteProduct(id);
+        showAlertBanner("Product deleted successfully.", "success");
+    } catch (error) {
+        console.error("Deletion failed:", error);
+        showAlertBanner("Failed to delete product from database.", "error");
+    }
 }
 window.deleteProduct = deleteProduct;
-
-/**
- * CRUD Operations: GALLERY
- */
-function loadAdminGallery() {
-    const tableBody = document.getElementById('admin-gallery-table');
-    if (!tableBody) return;
-
-    tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Querying Google Drive Assets...</td></tr>';
-
-    loadGallery().then(images => {
-        cachedAdminGallery = images;
-        renderAdminGallery(images);
-    }).catch(err => {
-        console.error("Failed to load admin gallery:", err);
-        tableBody.innerHTML = '<tr><td colspan="3" class="text-center" style="color: red;">Failed to retrieve gallery. Ensure SDK is connected.</td></tr>';
-    });
-}
 
 /**
  * Renders gallery items list inside the admin table
@@ -443,24 +476,23 @@ function renderAdminGallery(images) {
     updateBulkDeleteButton();
 
     if (images.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="3" class="text-center">No images found.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="3" class="text-center">No portfolio images found in database.</td></tr>';
         return;
     }
 
     images.forEach(img => {
         const row = document.createElement('tr');
         
-        // Get category label
         const catObj = (window.FURNITURE_CATEGORIES || []).find(c => c.id === img.category);
         const categoryLabel = catObj ? catObj.name : img.category;
 
         row.innerHTML = `
             <td style="text-align: center;">
-                <input type="checkbox" class="gallery-select-checkbox" data-id="${img.id}" style="width: 18px; height: 18px; cursor: pointer;">
+                <input type="checkbox" class="gallery-select-checkbox" data-id="${img.id}" data-url="${img.url}" style="width: 18px; height: 18px; cursor: pointer;">
             </td>
             <td>
                 <div style="display: flex; align-items: center; gap: 1rem;">
-                    <img src="${img.thumbnail}" alt="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);">
+                    <img src="${img.thumbnail || img.url}" alt="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);">
                     <div>
                         <strong>${img.title}</strong><br>
                         <small style="color: var(--text-secondary); text-transform: uppercase;">${categoryLabel}</small>
@@ -469,14 +501,14 @@ function renderAdminGallery(images) {
             </td>
             <td>
                 <div style="display: flex; justify-content: flex-end;">
-                    <button class="table-action-btn delete" onclick="deleteGalleryItem('${img.id}')" title="Delete Gallery Image"><i class="fas fa-trash"></i></button>
+                    <button class="table-action-btn delete" onclick="deleteGalleryItem('${img.id}', '${img.url}')" title="Delete Gallery Image"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         `;
         tableBody.appendChild(row);
     });
 
-    // Re-bind click handlers on new checkboxes
+    // Rebind check events
     const checkboxes = document.querySelectorAll('.gallery-select-checkbox');
     checkboxes.forEach(cb => {
         cb.addEventListener('change', updateBulkDeleteButton);
@@ -486,28 +518,24 @@ function renderAdminGallery(images) {
 /**
  * Handles individual item deletion
  */
-async function deleteGalleryItem(id) {
-    if (!confirm("Are you sure you want to delete this image? This will permanently delete it from Google Drive.")) return;
+async function deleteGalleryItem(id, url) {
+    if (!confirm("Are you sure you want to delete this portfolio photo? This will permanently delete it from Firebase Storage.")) return;
 
     try {
-        showAlertBanner("Deleting from Google Drive...", "success");
-        await deleteImage(id);
+        showAlertBanner("Deleting image from Cloud Storage...", "success");
+        await window.firebase.deleteImageByUrl(url);
+        await window.firebase.deleteGalleryItem(id);
         
-        let customGallery = JSON.parse(localStorage.getItem('bsabity_custom_gallery')) || [];
-        customGallery = customGallery.filter(item => item.id !== id);
-        localStorage.setItem('bsabity_custom_gallery', JSON.stringify(customGallery));
-
-        showAlertBanner("Gallery asset deleted successfully.", "success");
-        loadAdminGallery();
+        showAlertBanner("Gallery image successfully deleted.", "success");
     } catch (error) {
         console.error("Deletion failed:", error);
-        showAlertBanner("Failed to delete asset. Ensure Google Drive is connected.", "error");
+        showAlertBanner("Failed to delete gallery image.", "error");
     }
 }
 window.deleteGalleryItem = deleteGalleryItem;
 
 /**
- * Set up check-all and check-item triggers for bulk gallery operations
+ * Set up bulk gallery operations
  */
 function initBulkSelectionHandlers() {
     const masterCheckbox = document.getElementById('select-all-gallery');
@@ -525,38 +553,35 @@ function initBulkSelectionHandlers() {
     if (bulkDeleteBtn) {
         bulkDeleteBtn.addEventListener('click', async () => {
             const selectedBoxes = document.querySelectorAll('.gallery-select-checkbox:checked');
-            const idsToDelete = Array.from(selectedBoxes).map(cb => cb.getAttribute('data-id'));
-            
-            if (idsToDelete.length === 0) return;
+            if (selectedBoxes.length === 0) return;
 
-            if (!confirm(`Are you sure you want to delete the ${idsToDelete.length} selected images? This will permanently delete them from Google Drive and cannot be undone.`)) {
+            if (!confirm(`Are you sure you want to delete the ${selectedBoxes.length} selected images? This will permanently delete them from Firebase Storage and cannot be undone.`)) {
                 return;
             }
 
-            showAlertBanner(`Deleting ${idsToDelete.length} assets from Google Drive...`, "success");
+            showAlertBanner(`Deleting ${selectedBoxes.length} images from Firebase...`, "success");
 
             let deletedCount = 0;
-            let customGallery = JSON.parse(localStorage.getItem('bsabity_custom_gallery')) || [];
 
-            for (const id of idsToDelete) {
+            for (const cb of selectedBoxes) {
+                const id = cb.getAttribute('data-id');
+                const url = cb.getAttribute('data-url');
                 try {
-                    await deleteImage(id);
-                    customGallery = customGallery.filter(item => item.id !== id);
+                    await window.firebase.deleteImageByUrl(url);
+                    await window.firebase.deleteGalleryItem(id);
                     deletedCount++;
                 } catch (error) {
                     console.error(`Error deleting image ID ${id}:`, error);
                 }
             }
 
-            localStorage.setItem('bsabity_custom_gallery', JSON.stringify(customGallery));
-            showAlertBanner(`Deleted ${deletedCount} of ${idsToDelete.length} images successfully.`, "success");
-            loadAdminGallery();
+            showAlertBanner(`Successfully deleted ${deletedCount} of ${selectedBoxes.length} gallery assets.`, "success");
         });
     }
 }
 
 /**
- * Refreshes bulk deletion button state and text
+ * Refreshes bulk deletion button state
  */
 function updateBulkDeleteButton() {
     const selectedBoxes = document.querySelectorAll('.gallery-select-checkbox:checked');
@@ -576,71 +601,27 @@ function updateBulkDeleteButton() {
 }
 
 /**
- * Bind and initialize Google Drive Setting Inputs & Authorization triggers
+ * Configures the Firebase Seeding controls in the side panel
  */
-function initGoogleDriveSettingsHandler() {
-    const gdriveForm = document.getElementById('admin-gdrive-form');
-    const authBtn = document.getElementById('btn-gdrive-auth');
-
-    // Populate existing fields
-    const clientIdField = document.getElementById('gdrive-client-id');
-    const apiKeyField = document.getElementById('gdrive-api-key');
-    const folderIdField = document.getElementById('gdrive-folder-id');
-
-    if (clientIdField) clientIdField.value = GOOGLE_DRIVE_CONFIG.clientId || '';
-    if (apiKeyField) apiKeyField.value = GOOGLE_DRIVE_CONFIG.apiKey || '';
-    if (folderIdField) folderIdField.value = GOOGLE_DRIVE_CONFIG.folderId || '';
-
-    // Check saved status banner
-    const isConnected = localStorage.getItem('gdrive_connected_flag') === 'true';
-    updateDriveConnectionStatus(isConnected);
-
-    if (gdriveForm) {
-        gdriveForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const config = {
-                clientId: clientIdField.value.trim(),
-                apiKey: apiKeyField.value.trim(),
-                folderId: folderIdField.value.trim()
-            };
-
-            localStorage.setItem('bsabity_gdrive_config', JSON.stringify(config));
+function initFirebaseControlCenter() {
+    const seedBtn = document.getElementById('btn-seed-data');
+    if (seedBtn) {
+        seedBtn.addEventListener('click', async () => {
+            if (!confirm("This will populate empty Firestore collections with Bsabity's beautiful default metal and wood catalog products. Proceed?")) return;
             
-            // Apply live configurations
-            GOOGLE_DRIVE_CONFIG.clientId = config.clientId;
-            GOOGLE_DRIVE_CONFIG.apiKey = config.apiKey;
-            GOOGLE_DRIVE_CONFIG.folderId = config.folderId;
-
-            // Reset connected state on configuration update to require fresh connection
-            localStorage.removeItem('gdrive_connected_flag');
-            updateDriveConnectionStatus(false);
-
-            showAlertBanner("Google Drive settings saved! Click Connect to authorize.", "success");
-        });
-    }
-
-    if (authBtn) {
-        authBtn.addEventListener('click', async () => {
+            seedBtn.disabled = true;
+            seedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Seeding Firestore...';
+            
             try {
-                const authenticated = await authenticateGoogle();
-                if (authenticated) {
-                    loadAdminData(); // Refresh page data on successful connection
-                }
+                await window.firebase.seedInitialData();
+                showAlertBanner("Firebase Firestore database has been successfully seeded!", "success");
             } catch (err) {
-                console.error("Google Drive connection failed:", err);
+                console.error("Data seeding failed: ", err);
+                showAlertBanner("Seeding database failed.", "error");
+            } finally {
+                seedBtn.disabled = false;
+                seedBtn.innerHTML = '<i class="fas fa-magic"></i> Seed Premium Default Products';
             }
         });
     }
-}
-
-/**
- * Utility: Converts file to Base64 Data URL
- */
-function convertFileToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-        reader.readAsDataURL(file);
-    });
 }
