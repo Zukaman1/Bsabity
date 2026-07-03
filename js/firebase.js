@@ -5,6 +5,7 @@
  */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 import { 
     getFirestore, 
     collection, 
@@ -31,16 +32,18 @@ import {
 
 // Secure & correct production-ready config
 const firebaseConfig = {
-    apiKey: window.ENV_FIREBASE_API_KEY || "AIzaSyAs-M6vY_G8X9S0fE2k8P9B1m7V3l4Y5uI", // Injected at runtime or fallback
+    apiKey: "AIzaSyB5OK8xmHv6i674wUkfW3TKe6jg4uYv4wY",
     authDomain: "bsabity-furniture.firebaseapp.com",
     projectId: "bsabity-furniture",
-    storageBucket: "bsabity-furniture.appspot.com",
-    messagingSenderId: "1046960813958",
-    appId: "1:1046960813958:web:b1d8f8e0d4c1c9c7f68ad8"
+    storageBucket: "bsabity-furniture.firebasestorage.app",
+    messagingSenderId: "873839226999",
+    appId: "1:873839226999:web:8f040953db513abdf0d672",
+    measurementId: "G-D3RWNMMHER"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
