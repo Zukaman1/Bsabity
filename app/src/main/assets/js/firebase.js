@@ -148,7 +148,21 @@ const DEFAULT_GALLERY = [
 ];
 
 // Seed databases if they are empty
+let isSeedingInProgress = false;
+
 async function seedInitialDatabase() {
+    if (isSeedingInProgress) {
+        console.log("Database seeding is already in progress...");
+        return;
+    }
+    
+    // Check local storage to prevent running multiple times in the same session/browser
+    if (localStorage.getItem('bsabity_db_seeded') === 'true') {
+        console.log("Database seeding already verified/completed for this session.");
+        return;
+    }
+
+    isSeedingInProgress = true;
     try {
         // 1. Seed Categories
         const catSnap = await getDocs(collection(db, "categories"));
@@ -189,8 +203,13 @@ async function seedInitialDatabase() {
             await batch.commit();
             console.log("Gallery successfully seeded!");
         }
+
+        // Mark as seeded in localStorage to prevent subsequent checks
+        localStorage.setItem('bsabity_db_seeded', 'true');
     } catch (error) {
         console.error("Error seeding initial database: ", error);
+    } finally {
+        isSeedingInProgress = false;
     }
 }
 
@@ -255,18 +274,36 @@ window.firebase = {
         await deleteDoc(docRef);
     },
 
-    // Firebase Storage upload & delete
+    // Firebase Storage upload & delete with built-in timeout to avoid infinite hanging
     uploadImage: async (file, fileName) => {
-        const uniqueName = `gallery/${Date.now()}_${fileName || file.name}`;
-        const storageRef = ref(storage, uniqueName);
-        
-        const snapshot = await uploadBytes(storageRef, file);
-        const downloadUrl = await getDownloadURL(snapshot.ref);
-        
-        return {
-            url: downloadUrl,
-            storagePath: uniqueName
-        };
+        try {
+            const uniqueName = `gallery/${Date.now()}_${fileName || file.name}`;
+            const storageRef = ref(storage, uniqueName);
+            
+            // Timeout limit: 20 seconds for the entire chunk upload to prevent infinite spinner
+            const uploadPromise = uploadBytes(storageRef, file);
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("Upload timed out (20 second limit exceeded)")), 20000)
+            );
+            
+            const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
+            
+            // Get URL with a 10s timeout
+            const urlPromise = getDownloadURL(snapshot.ref);
+            const urlTimeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("Getting download URL timed out")), 10000)
+            );
+            
+            const downloadUrl = await Promise.race([urlPromise, urlTimeoutPromise]);
+            
+            return {
+                url: downloadUrl,
+                storagePath: uniqueName
+            };
+        } catch (error) {
+            console.error("Firebase uploadImage encountered an error:", error);
+            throw error; // Propagate error so that calling UI components can turn off their loading spinners/disable-states
+        }
     },
 
     deleteImageByUrl: async (imageUrl) => {
