@@ -252,8 +252,7 @@ window.firebase = {
             callback(products);
         }, (error) => {
             console.error("Realtime products sync error:", error);
-            // Fallback
-            callback(DEFAULT_PRODUCTS.map((p, i) => ({ id: `default_prod_${i}`, ...p })));
+            callback([]);
         });
     },
 
@@ -298,7 +297,7 @@ window.firebase = {
             callback(items);
         }, (error) => {
             console.error("Realtime gallery sync error:", error);
-            callback(DEFAULT_GALLERY.map((g, i) => ({ id: `default_gal_${i}`, ...g })));
+            callback([]);
         });
     },
 
@@ -316,9 +315,9 @@ window.firebase = {
     },
 
     // Firebase Storage upload & delete with built-in timeout to avoid infinite hanging
-    uploadImage: async (file, fileName) => {
+    uploadImage: async (file, fileName, folder = "gallery") => {
         try {
-            const uniqueName = `gallery/${Date.now()}_${fileName || file.name}`;
+            const uniqueName = `${folder}/${Date.now()}_${fileName || file.name}`;
             const storageRef = ref(storage, uniqueName);
             
             // Timeout limit: 20 seconds for the entire chunk upload to prevent infinite spinner
@@ -374,7 +373,7 @@ window.firebase = {
 // Auto-seed if empty when database loads
 seedInitialDatabase();
 
-// Legacy backward-compatibility wrapper helpers (previously in google-drive.js)
+// Legacy backward-compatibility wrapper helpers
 window.loadProducts = async function() {
     return new Promise((resolve) => {
         const checkFirebase = setInterval(() => {

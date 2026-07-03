@@ -1,9 +1,9 @@
-# Bsabity Furniture Workshop - Premium Web & Android Project
+# Bsabity Furniture Workshop - Premium Web & Android Project (Firebase Powered)
 
 Welcome to the official codebase of **Bsabity Furniture Workshop**, a premium, responsive web application and integrated native Android companion app engineered for a world-class furniture manufacturing workshop in Rwanda.
 
-This repository features a **dual-delivery architecture**:
-1. **Premium Web Application (HTML5, CSS3, JavaScript):** Accessible via standard web browsers, fully installable (Progressive Web App - PWA), and optimized with modern dark/light styling, masonry image galleries, and interactive local state controllers.
+This repository features a modern, cloud-native **dual-delivery architecture**:
+1. **Premium Web Application (HTML5, CSS3, JavaScript):** Powered by **Firebase (Firestore, Storage, CDN v12)**, fully installable (Progressive Web App - PWA), featuring a masonry image gallery, real-time catalogs, and interactive dashboard controllers.
 2. **Native Android Companion App (Jetpack Compose, Kotlin, WebView):** Runs a localized, high-speed container of the web system directly inside an Android container, featuring edge-to-edge screens and back-gesture handlers.
 
 ---
@@ -11,9 +11,9 @@ This repository features a **dual-delivery architecture**:
 ## 🚀 How to Run Locally
 
 ### 1. Web Application (Browser)
-Because the website is built entirely on modern static web standards, you can run it without any local compilation:
-- **Option A (Double-Click):** Simply open the root `index.html` file in any modern web browser (Chrome, Safari, Firefox, Edge).
-- **Option B (Local Web Server - Recommended):** If you wish to test PWA capabilities, offline caching (Service Workers), or Google Drive API integrations, run a simple local HTTP server from the root directory:
+Because the website is built on static web standards, you can run it without any local compilation:
+- **Option A (Double-Click):** Simply open the root `index.html` file in any modern web browser.
+- **Option B (Local Web Server - Recommended):** To test PWA capabilities, offline caching (Service Workers), or Firebase database synchronization, run a simple local HTTP server from the root directory:
   ```bash
   # Using Python 3
   python3 -m http.server 8000
@@ -24,91 +24,111 @@ Because the website is built entirely on modern static web standards, you can ru
   Then, navigate your web browser to `http://localhost:8000`.
 
 ### 2. Android App (Emulator / Device)
-Since the project uses an incremental compilation pipeline, you can compile and launch the companion Android app onto your streaming emulator or a physical device:
+Since the project uses an incremental compilation pipeline, you can compile and launch the companion Android app onto a streaming emulator or a physical device:
 - Gradle automatically copies all root web assets (`index.html`, `css/`, `js/`, etc.) into the Android package assets folder upon compile.
 - In Android Studio, open the root folder, wait for Gradle synchronization, and click **Run**.
 
 ---
 
-## ☁️ How to Deploy Online
+## 🔥 Pure Firebase Cloud Architecture
 
-This project is structured for immediate, seamless hosting on modern CDNs with zero configuration required.
+The entire project is backed by Firebase for secure, real-time, scale-ready cloud storage and data persistence.
+
+### 🗄️ 1. Cloud Firestore Database
+The system uses real-time snapshot listeners (`onSnapshot`) to synchronize product listings and the portfolio showcase instantly across all client devices without full-page reloads.
+
+- **`products` Collection:** Contains the workshop's product catalog. Each document has:
+  - `name` (String)
+  - `category` (String)
+  - `description` (String)
+  - `price` (String)
+  - `discount` (Number)
+  - `availability` (String)
+  - `image` (String - Storage download URL)
+  - `createdAt` (String - ISO Timestamp)
+- **`gallery` Collection:** Stores the portfolio images rendered in the masonry gallery grid:
+  - `title` (String)
+  - `category` (String)
+  - `url` (String - Storage download URL)
+  - `thumbnail` (String - Storage download URL)
+  - `createdAt` (String - ISO Timestamp)
+
+### 📁 2. Firebase Storage
+Assets are organized cleanly inside Firebase Storage buckets:
+- **`gallery/`**: Main portfolio photos and client showcase files.
+- **`products/`**: Images associated with catalog products.
+
+### 🛡️ 3. Security Rules Configurations
+
+#### Cloud Firestore Rules (`firestore.rules`):
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+#### Firebase Storage Rules (`storage.rules`):
+```javascript
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}
+```
+
+---
+
+## 🛠️ Real-Time Admin Dashboard
+
+To make inventory and showcase updates seamless, Bsabity Furniture uses an integrated client-side **Admin Dashboard** (`admin.html`):
+
+1. **Authentication:** Enter the default password **`admin123`** to access the dashboard.
+2. **Product Save Flow:**
+   - Add new items or edit existing ones.
+   - When saving, if a custom preview image is uploaded:
+     - It is sent to Firebase Storage under the `products/` path.
+     - A product document is created in the Firestore `products` collection.
+     - A matching showcase document is automatically created in the `gallery` collection.
+3. **Gallery Upload Flow:**
+   - Multi-select multiple files to bulk-upload to Firebase Storage under the `gallery/` path.
+   - Documents are created instantly in the `gallery` collection and updated on the gallery page in real-time.
+4. **Delete and Purge Flow:**
+   - Clicking delete on any product or gallery image removes the Firestore document and purges the file from Firebase Storage automatically to save bucket space.
+
+---
+
+## ☁️ Online Deployment & Hosting
 
 ### 1. Deploying to GitHub Pages (100% Free)
-1. Initialize a Git repository in the root folder and push it to a new public GitHub repository:
+1. Initialize a Git repository in the root folder and push to your GitHub repository:
    ```bash
    git init
    git add .
-   git commit -m "feat: initial commit of Bsabity Furniture Workshop"
+   git commit -m "fix: fully migrate project to Firebase"
    git branch -M main
-   git remote add origin https://github.com/your-username/bsabity-furniture.git
+   git remote add origin https://github.com/Zukaman1/Bsabity.git
    git push -u origin main
    ```
-2. On GitHub, navigate to your repository's **Settings** tab.
-3. Click on the **Pages** menu item in the sidebar.
-4. Under **Build and deployment**, set the source to **Deploy from a branch**.
-5. Select the **main** branch and `/ (root)` folder, then click **Save**.
-6. Your website will be live at `https://your-username.github.io/bsabity-furniture/` in less than 2 minutes!
+2. On GitHub, navigate to **Settings** -> **Pages**.
+3. Under **Build and deployment**, set the source to **Deploy from a branch**.
+4. Select the **main** branch and `/ (root)` folder, and click **Save**.
 
-### 2. Deploying to Netlify
-1. Log in to your [Netlify Dashboard](https://app.netlify.com/).
-2. Click **Add new site** -> **Import from an existing project** (or use the Drag-and-Drop option with your exported ZIP file).
-3. If connected to GitHub, select your repository.
-4. Set the following build settings:
-   - **Build Command:** *(Leave blank)*
-   - **Publish Directory:** `.` (or root directory)
-5. Click **Deploy Site**. Netlify will provide you with a secure custom SSL URL (e.g., `https://bsabity-furniture.netlify.app`).
-
-### 3. Deploying to Vercel
-1. Install Vercel CLI (`npm i -g vercel`) or go to [Vercel Dashboard](https://vercel.com).
-2. Click **Add New** -> **Project**, select your pushed GitHub repository, and click **Deploy**.
+### 2. Deploying to Vercel or Netlify
+- Connect your GitHub repository to Vercel/Netlify for immediate deployment.
+- No build command is required. Set the publish directory to `.` (root).
 
 ---
 
-## 🔗 How to Connect the Google Drive API
-
-The project comes pre-configured with a modular adapter in `js/google-drive.js`. When connected, all portfolio showcase photos are loaded, uploaded, or deleted directly from your Google Drive folder.
-
-### Step-by-Step API Setup:
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new Project called **"Bsabity Gallery"**.
-3. Enable the **Google Drive API** in your project under "APIs & Services".
-4. Go to the **Credentials** tab:
-   - Create an **OAuth 2.0 Client ID** (for front-end user authorization during uploads) or an **API Key** (for fast, read-only public downloads).
-5. Share a Google Drive folder publicly:
-   - Create a folder in Google Drive.
-   - Right-click, select **Share**, and set permissions to **"Anyone with the link can view"** (this is critical so that your customers can view the images).
-   - Copy the folder's ID from the browser URL (the long string of letters and numbers after `/folders/`).
-6. Open `/js/google-drive.js` and insert your credentials into the config object:
-   ```javascript
-   const GOOGLE_DRIVE_CONFIG = {
-       clientId: 'YOUR_GOOGLE_CLIENT_ID_PLACEHOLDER', // e.g. "1234567890-abc.apps.googleusercontent.com"
-       apiKey: 'YOUR_GOOGLE_API_KEY_PLACEHOLDER',     // Your Browser API Key
-       folderId: 'YOUR_SHARED_FOLDER_ID_PLACEHOLDER', // Your shared Google Drive Folder ID
-       scopes: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.readonly',
-       discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"]
-   };
-   ```
-7. That's it! The gallery on `gallery.html` and the uploader in `admin.html` will now automatically feed directly from your Google Drive cloud!
-
----
-
-## ⚙️ How to Change Business Information
-
-To adjust core business metadata, simply edit the localized tags inside the code files:
-* **Contact Phone:** Search and replace `+250 783 847 520` inside `index.html`, `about.html`, `services.html`, `gallery.html`, `products.html`, and `contact.html`.
+## ⚙️ Changing Business Information
+To update contact details or localized content:
+* **Contact Phone:** Search and replace `+250 783 847 520` in all HTML files.
 * **Contact Email:** Search and replace `Bsabity@gmail.com` in all HTML files.
-* **Localization Dictionary:** If you want to update Kinyarwanda translations or add new languages, open `/js/app.js` and modify the values inside the `TRANSLATIONS` dictionary object. Any element with a `data-i18n` attribute will be translated instantly in real-time.
-
----
-
-## 🛠️ How to Add, Edit, or Delete Products & Prices
-
-To prevent the need for a complex database, Bsabity Furniture uses an elegant **Client-Side Admin Panel** with automatic browser backup:
-
-1. Open `admin.html` in your browser.
-2. Enter the default master password: **`admin123`**.
-3. **Adding Products:** Fill out the "Add New Product" form (Name, Category, Description, Base Price, and Availability Status) and upload a preview image. Clicking **Save** will write it to the browser's persistent LocalStorage database instantly.
-4. **Editing Products:** Click the blue edit pencil icon next to any product in the inventory list. The details will populate the edit form. Make your modifications (such as updating price or changing availability) and click **Save**.
-5. **Deleting Products:** Click the red trash icon next to any product inside the dashboard list to instantly remove it from the public directory.
-6. **Live Synchronization:** All changes made in the Admin Panel update the standard catalogs, cards, and pricing guide tables across the website in real-time!
+* **Translations:** Open `/js/app.js` and modify elements inside the `TRANSLATIONS` dictionary.

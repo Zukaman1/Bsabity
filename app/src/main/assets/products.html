@@ -182,7 +182,7 @@
             tableContainer.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">Loading price list...</td></tr>';
 
             try {
-                // Load products via Google Drive or LocalStorage fallback
+                // Load products via Firebase Firestore realtime listener
                 const products = await loadProducts();
                 
                 // Render Product Cards

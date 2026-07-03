@@ -294,22 +294,8 @@ function initAdminFormHandlers() {
                 if (imageFileInput && imageFileInput.files.length > 0) {
                     const file = imageFileInput.files[0];
                     showAlertBanner(`Uploading "${file.name}" to Cloud Storage...`, "success");
-                    const uploadResult = await window.firebase.uploadImage(file, file.name);
+                    const uploadResult = await window.firebase.uploadImage(file, file.name, "products");
                     imageUrl = uploadResult.url;
-
-                    // Also save the uploaded image to Firestore gallery collection
-                    try {
-                        const galleryItem = {
-                            title: nameInput.value.trim() || file.name.split('.')[0].replace(/[-_]/g, ' '),
-                            category: categorySelect.value,
-                            url: imageUrl,
-                            thumbnail: imageUrl
-                        };
-                        await window.firebase.addGalleryItem(galleryItem);
-                        console.log("Successfully saved product image to Firestore gallery collection.");
-                    } catch (galErr) {
-                        console.error("Error saving product image to gallery collection:", galErr);
-                    }
                 }
 
                 const productPayload = {
@@ -329,6 +315,22 @@ function initAdminFormHandlers() {
                     // Update Product in Firestore
                     await window.firebase.updateProduct(idInput.value, productPayload);
                     showAlertBanner("Product details updated in real-time!", "success");
+                    
+                    // If a new image was uploaded, also create/sync a matching gallery document
+                    if (imageUrl) {
+                        try {
+                            const galleryItem = {
+                                title: nameInput.value.trim(),
+                                category: categorySelect.value,
+                                url: imageUrl,
+                                thumbnail: imageUrl
+                            };
+                            await window.firebase.addGalleryItem(galleryItem);
+                            console.log("Automatically saved updated product image to Firestore gallery collection.");
+                        } catch (galErr) {
+                            console.error("Error saving updated product image to gallery collection:", galErr);
+                        }
+                    }
                 } else {
                     // Create Product in Firestore
                     if (!imageUrl) {
@@ -337,6 +339,21 @@ function initAdminFormHandlers() {
                     }
                     await window.firebase.addProduct(productPayload);
                     showAlertBanner("New masterpiece added to Firebase database!", "success");
+
+                    // Automatically create matching Gallery document if we have an image
+                    const finalImage = productPayload.image;
+                    try {
+                        const galleryItem = {
+                            title: productPayload.name,
+                            category: productPayload.category,
+                            url: finalImage,
+                            thumbnail: finalImage
+                        };
+                        await window.firebase.addGalleryItem(galleryItem);
+                        console.log("Automatically saved new product image to Firestore gallery collection.");
+                    } catch (galErr) {
+                        console.error("Error saving product image to gallery collection:", galErr);
+                    }
                 }
 
                 productForm.reset();

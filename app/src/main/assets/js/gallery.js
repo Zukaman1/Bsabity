@@ -28,13 +28,22 @@ async function initializeGallery() {
     `;
 
     try {
-        // Dynamically populate category filter buttons
-        populateGalleryFilters();
+        // Wait for window.firebase to be fully initialized and ready
+        const checkFirebase = setInterval(() => {
+            if (window.firebase && window.firebase.onGalleryUpdate) {
+                clearInterval(checkFirebase);
+                
+                // Dynamically populate category filter buttons
+                populateGalleryFilters();
 
-        // Fetch images using the google-drive.js fallback provider
-        activeGalleryImages = await loadGallery();
-        renderGallery(activeGalleryImages);
-        initCategoryFilters();
+                // Setup realtime listener directly from Firestore
+                window.firebase.onGalleryUpdate((gallery) => {
+                    activeGalleryImages = gallery;
+                    renderGallery(activeGalleryImages);
+                    initCategoryFilters();
+                });
+            }
+        }, 50);
     } catch (error) {
         console.error("Gallery initialization error:", error);
         galleryGrid.innerHTML = `<p class="text-center" style="grid-column: 1/-1; color: var(--text-secondary);">Unable to load gallery assets. Please try again later.</p>`;
