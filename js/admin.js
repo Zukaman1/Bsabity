@@ -296,6 +296,20 @@ function initAdminFormHandlers() {
                     showAlertBanner(`Uploading "${file.name}" to Cloud Storage...`, "success");
                     const uploadResult = await window.firebase.uploadImage(file, file.name);
                     imageUrl = uploadResult.url;
+
+                    // Also save the uploaded image to Firestore gallery collection
+                    try {
+                        const galleryItem = {
+                            title: nameInput.value.trim() || file.name.split('.')[0].replace(/[-_]/g, ' '),
+                            category: categorySelect.value,
+                            url: imageUrl,
+                            thumbnail: imageUrl
+                        };
+                        await window.firebase.addGalleryItem(galleryItem);
+                        console.log("Successfully saved product image to Firestore gallery collection.");
+                    } catch (galErr) {
+                        console.error("Error saving product image to gallery collection:", galErr);
+                    }
                 }
 
                 const productPayload = {
@@ -347,6 +361,9 @@ function initAdminFormHandlers() {
         galleryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const submitBtn = galleryForm.querySelector('button[type="submit"]');
+            const originalBtnHtml = submitBtn.innerHTML;
+            
             const titleInput = document.getElementById('gallery-img-title');
             const categorySelect = document.getElementById('gallery-img-category');
             const imageFileInput = document.getElementById('gallery-img-file');
@@ -366,52 +383,74 @@ function initAdminFormHandlers() {
             const progressText = document.getElementById('upload-progress-text');
             const progressPercent = document.getElementById('upload-progress-percent');
 
-            if (progressContainer) progressContainer.style.display = 'block';
+            if (progressContainer) {
+                progressContainer.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressPercent.textContent = '0%';
+                progressText.textContent = 'Preparing upload...';
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
             let successfulUploads = 0;
 
-            for (let i = 0; i < totalFiles; i++) {
-                const file = files[i];
-                const fileTitle = (i === 0) ? titleBase : file.name.split('.')[0].replace(/[-_]/g, ' ');
+            try {
+                for (let i = 0; i < totalFiles; i++) {
+                    const file = files[i];
+                    const fileTitle = (i === 0) ? titleBase : file.name.split('.')[0].replace(/[-_]/g, ' ');
 
-                // Update progress metrics
-                const percent = Math.round((i / totalFiles) * 100);
-                if (progressBar) progressBar.style.width = `${percent}%`;
-                if (progressText) progressText.textContent = `Uploading item ${i + 1} of ${totalFiles}: "${fileTitle}"...`;
-                if (progressPercent) progressPercent.textContent = `${percent}%`;
+                    // Update progress metrics
+                    const percent = Math.round((i / totalFiles) * 100);
+                    if (progressBar) progressBar.style.width = `${percent}%`;
+                    if (progressText) progressText.textContent = `Uploading item ${i + 1} of ${totalFiles}: "${fileTitle}"...`;
+                    if (progressPercent) progressPercent.textContent = `${percent}%`;
 
-                try {
-                    // Upload directly to Cloud Storage
-                    const uploadResult = await window.firebase.uploadImage(file, file.name);
+                    try {
+                        // Upload directly to Cloud Storage
+                        const uploadResult = await window.firebase.uploadImage(file, file.name);
 
-                    // Insert metadata into Firestore gallery collection
-                    const newGalleryItem = {
-                        title: fileTitle,
-                        category: categorySelect.value,
-                        url: uploadResult.url,
-                        thumbnail: uploadResult.url
-                    };
+                        // Insert metadata into Firestore gallery collection
+                        const newGalleryItem = {
+                            title: fileTitle,
+                            category: categorySelect.value,
+                            url: uploadResult.url,
+                            thumbnail: uploadResult.url
+                        };
 
-                    await window.firebase.addGalleryItem(newGalleryItem);
-                    successfulUploads++;
-                } catch (error) {
-                    console.error(`Upload failed for file "${file.name}":`, error);
+                        await window.firebase.addGalleryItem(newGalleryItem);
+                        successfulUploads++;
+                    } catch (error) {
+                        console.error(`Upload failed for file "${file.name}":`, error);
+                        showAlertBanner(`Failed to upload "${file.name}".`, "error");
+                    }
                 }
-            }
 
-            // Finished progress wrap-up
-            if (progressBar) progressBar.style.width = '100%';
-            if (progressPercent) progressPercent.textContent = '100%';
-            if (progressText) progressText.textContent = `Upload completed! ${successfulUploads} of ${totalFiles} images uploaded to Firebase Storage.`;
-
-            setTimeout(() => {
-                if (progressContainer) progressContainer.style.display = 'none';
-                if (progressBar) progressBar.style.width = '0%';
-                if (progressPercent) progressPercent.textContent = '0%';
+                // Finished progress wrap-up
+                if (progressBar) progressBar.style.width = '100%';
+                if (progressPercent) progressPercent.textContent = '100%';
                 
-                showAlertBanner(`Success! ${successfulUploads} assets synchronized to Firebase Storage.`, "success");
-                galleryForm.reset();
-            }, 1500);
+                if (successfulUploads > 0) {
+                    if (progressText) progressText.textContent = `Upload completed! ${successfulUploads} of ${totalFiles} images uploaded to Firebase Storage.`;
+                    showAlertBanner(`Success! ${successfulUploads} assets synchronized to Firebase Storage.`, "success");
+                    galleryForm.reset();
+                } else {
+                    if (progressText) progressText.textContent = `Upload failed completely. 0 of ${totalFiles} images uploaded.`;
+                    showAlertBanner("Upload process failed. No images were saved.", "error");
+                }
+            } catch (globalError) {
+                console.error("Global upload handler error:", globalError);
+                showAlertBanner("A system error occurred during upload.", "error");
+            } finally {
+                setTimeout(() => {
+                    if (progressContainer) progressContainer.style.display = 'none';
+                    if (progressBar) progressBar.style.width = '0%';
+                    if (progressPercent) progressPercent.textContent = '0%';
+                    
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }, 1500);
+            }
         });
     }
 }

@@ -157,12 +157,13 @@ async function seedInitialDatabase() {
     }
     
     // Check local storage to prevent running multiple times in the same session/browser
-    if (localStorage.getItem('bsabity_db_seeded') === 'true') {
-        console.log("Database seeding already verified/completed for this session.");
+    if (localStorage.getItem('bsabity_db_seeded') === 'true' || localStorage.getItem('bsabity_db_seeding') === 'true') {
+        console.log("Database seeding already verified, completed, or in progress.");
         return;
     }
 
     isSeedingInProgress = true;
+    localStorage.setItem('bsabity_db_seeding', 'true');
     try {
         // 1. Seed Categories
         const catSnap = await getDocs(collection(db, "categories"));
@@ -172,7 +173,10 @@ async function seedInitialDatabase() {
             const categories = window.FURNITURE_CATEGORIES || [];
             categories.forEach(cat => {
                 const docRef = doc(collection(db, "categories"), cat.id);
-                batch.set(docRef, { name: cat.name });
+                batch.set(docRef, { 
+                    name: cat.name,
+                    createdAt: new Date().toISOString()
+                });
             });
             await batch.commit();
             console.log("Categories successfully seeded!");
@@ -185,7 +189,10 @@ async function seedInitialDatabase() {
             const batch = writeBatch(db);
             DEFAULT_PRODUCTS.forEach(prod => {
                 const newDocRef = doc(collection(db, "products"));
-                batch.set(newDocRef, prod);
+                batch.set(newDocRef, {
+                    ...prod,
+                    createdAt: new Date().toISOString()
+                });
             });
             await batch.commit();
             console.log("Products successfully seeded!");
@@ -198,7 +205,10 @@ async function seedInitialDatabase() {
             const batch = writeBatch(db);
             DEFAULT_GALLERY.forEach(item => {
                 const newDocRef = doc(collection(db, "gallery"));
-                batch.set(newDocRef, item);
+                batch.set(newDocRef, {
+                    ...item,
+                    createdAt: new Date().toISOString()
+                });
             });
             await batch.commit();
             console.log("Gallery successfully seeded!");
@@ -210,6 +220,7 @@ async function seedInitialDatabase() {
         console.error("Error seeding initial database: ", error);
     } finally {
         isSeedingInProgress = false;
+        localStorage.removeItem('bsabity_db_seeding');
     }
 }
 
@@ -220,12 +231,21 @@ window.firebase = {
     
     // Products REST replacement CRUD with onSnapshot Realtime Listeners
     onProductsUpdate: (callback) => {
-        const q = query(collection(db, "products"), orderBy("name", "asc"));
+        const q = collection(db, "products");
         return onSnapshot(q, (snapshot) => {
             const products = [];
             snapshot.forEach((doc) => {
                 products.push({ id: doc.id, ...doc.data() });
             });
+            
+            // Sort client-side to ensure query never fails due to missing composite indexes
+            products.sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                if (dateB !== dateA) return dateB - dateA; // Newest first
+                return (a.name || "").localeCompare(b.name || "");
+            });
+            
             callback(products);
         }, (error) => {
             console.error("Realtime products sync error:", error);
@@ -235,13 +255,19 @@ window.firebase = {
     },
 
     addProduct: async (product) => {
-        const docRef = await addDoc(collection(db, "products"), product);
+        const docRef = await addDoc(collection(db, "products"), {
+            ...product,
+            createdAt: new Date().toISOString()
+        });
         return docRef.id;
     },
 
     updateProduct: async (id, product) => {
         const docRef = doc(db, "products", id);
-        await updateDoc(docRef, product);
+        await updateDoc(docRef, {
+            ...product,
+            updatedAt: new Date().toISOString()
+        });
     },
 
     deleteProduct: async (id) => {
@@ -251,12 +277,21 @@ window.firebase = {
 
     // Gallery operations
     onGalleryUpdate: (callback) => {
-        const q = query(collection(db, "gallery"), orderBy("title", "asc"));
+        const q = collection(db, "gallery");
         return onSnapshot(q, (snapshot) => {
             const items = [];
             snapshot.forEach((doc) => {
                 items.push({ id: doc.id, ...doc.data() });
             });
+            
+            // Sort client-side to guarantee compatibility without index requirements
+            items.sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                if (dateB !== dateA) return dateB - dateA; // Newest first
+                return (a.title || "").localeCompare(b.title || "");
+            });
+            
             callback(items);
         }, (error) => {
             console.error("Realtime gallery sync error:", error);
@@ -265,7 +300,10 @@ window.firebase = {
     },
 
     addGalleryItem: async (item) => {
-        const docRef = await addDoc(collection(db, "gallery"), item);
+        const docRef = await addDoc(collection(db, "gallery"), {
+            ...item,
+            createdAt: new Date().toISOString()
+        });
         return docRef.id;
     },
 
