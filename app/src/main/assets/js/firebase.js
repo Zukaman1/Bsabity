@@ -248,24 +248,48 @@ window.firebase = {
     },
 
     addProduct: async (product) => {
-        const docRef = await addDoc(collection(db, "products"), {
-            ...product,
-            createdAt: new Date().toISOString()
-        });
-        return docRef.id;
+        try {
+            const docRef = await addDoc(collection(db, "products"), {
+                ...product,
+                createdAt: new Date().toISOString()
+            });
+            return docRef.id;
+        } catch (error) {
+            console.error("Firestore addProduct failed:", error);
+            if (error.stack) {
+                console.error("Firestore error stack:", error.stack);
+            }
+            throw error;
+        }
     },
 
     updateProduct: async (id, product) => {
-        const docRef = doc(db, "products", id);
-        await updateDoc(docRef, {
-            ...product,
-            updatedAt: new Date().toISOString()
-        });
+        try {
+            const docRef = doc(db, "products", id);
+            await updateDoc(docRef, {
+                ...product,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error(`Firestore updateProduct failed for id ${id}:`, error);
+            if (error.stack) {
+                console.error("Firestore error stack:", error.stack);
+            }
+            throw error;
+        }
     },
 
     deleteProduct: async (id) => {
-        const docRef = doc(db, "products", id);
-        await deleteDoc(docRef);
+        try {
+            const docRef = doc(db, "products", id);
+            await deleteDoc(docRef);
+        } catch (error) {
+            console.error(`Firestore deleteProduct failed for id ${id}:`, error);
+            if (error.stack) {
+                console.error("Firestore error stack:", error.stack);
+            }
+            throw error;
+        }
     },
 
     // Gallery operations
@@ -293,16 +317,32 @@ window.firebase = {
     },
 
     addGalleryItem: async (item) => {
-        const docRef = await addDoc(collection(db, "gallery"), {
-            ...item,
-            createdAt: new Date().toISOString()
-        });
-        return docRef.id;
+        try {
+            const docRef = await addDoc(collection(db, "gallery"), {
+                ...item,
+                createdAt: new Date().toISOString()
+            });
+            return docRef.id;
+        } catch (error) {
+            console.error("Firestore addGalleryItem failed:", error);
+            if (error.stack) {
+                console.error("Firestore error stack:", error.stack);
+            }
+            throw error;
+        }
     },
 
     deleteGalleryItem: async (id) => {
-        const docRef = doc(db, "gallery", id);
-        await deleteDoc(docRef);
+        try {
+            const docRef = doc(db, "gallery", id);
+            await deleteDoc(docRef);
+        } catch (error) {
+            console.error(`Firestore deleteGalleryItem failed for id ${id}:`, error);
+            if (error.stack) {
+                console.error("Firestore error stack:", error.stack);
+            }
+            throw error;
+        }
     },
 
     // Cloudinary upload & delete with built-in error safety

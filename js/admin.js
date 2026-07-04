@@ -313,10 +313,15 @@ function initAdminFormHandlers() {
                     productPayload.image = imageUrl;
                     productPayload.cloudinaryPublicId = cloudinaryPublicId;
                 } else if (idInput && idInput.value) {
-                    // Retain existing public id on update if no new image uploaded
+                    // Retain existing image and public id on update if no new image uploaded
                     const existingProd = cachedAdminProducts.find(p => p.id === idInput.value);
-                    if (existingProd && existingProd.cloudinaryPublicId) {
-                        productPayload.cloudinaryPublicId = existingProd.cloudinaryPublicId;
+                    if (existingProd) {
+                        if (existingProd.image) {
+                            productPayload.image = existingProd.image;
+                        }
+                        if (existingProd.cloudinaryPublicId) {
+                            productPayload.cloudinaryPublicId = existingProd.cloudinaryPublicId;
+                        }
                     }
                 }
 
@@ -351,20 +356,21 @@ function initAdminFormHandlers() {
                     await window.firebase.addProduct(productPayload);
                     showAlertBanner("New masterpiece added to Firebase database!", "success");
 
-                    // Automatically create matching Gallery document if we have an image
-                    const finalImage = productPayload.image;
-                    try {
-                        const galleryItem = {
-                            title: productPayload.name,
-                            category: productPayload.category,
-                            url: finalImage,
-                            thumbnail: finalImage,
-                            cloudinaryPublicId: productPayload.cloudinaryPublicId || null
-                        };
-                        await window.firebase.addGalleryItem(galleryItem);
-                        console.log("Automatically saved new product image to Firestore gallery collection.");
-                    } catch (galErr) {
-                        console.error("Error saving product image to gallery collection:", galErr);
+                    // Automatically create matching Gallery document only if we have an uploaded image
+                    if (imageUrl) {
+                        try {
+                            const galleryItem = {
+                                title: productPayload.name,
+                                category: productPayload.category,
+                                url: imageUrl,
+                                thumbnail: imageUrl,
+                                cloudinaryPublicId: cloudinaryPublicId
+                            };
+                            await window.firebase.addGalleryItem(galleryItem);
+                            console.log("Automatically saved new product image to Firestore gallery collection.");
+                        } catch (galErr) {
+                            console.error("Error saving product image to gallery collection:", galErr);
+                        }
                     }
                 }
 
@@ -535,9 +541,13 @@ async function deleteProduct(id) {
 
     try {
         const prod = cachedAdminProducts.find(p => p.id === id);
-        // If product has custom Cloudinary image, delete it!
+        // If product has custom Cloudinary image, delete it, but don't block Firestore deletion if Cloudinary fails
         if (prod && prod.image) {
-            await window.firebase.deleteImageByUrl(prod.image, prod.cloudinaryPublicId);
+            try {
+                await window.firebase.deleteImageByUrl(prod.image, prod.cloudinaryPublicId);
+            } catch (cloudinaryError) {
+                console.error("Non-blocking Cloudinary image deletion failed during product delete:", cloudinaryError);
+            }
         }
         
         await window.firebase.deleteProduct(id);
@@ -611,7 +621,11 @@ async function deleteGalleryItem(id, url, publicId) {
 
     try {
         showAlertBanner("Deleting image from Cloudinary...", "success");
-        await window.firebase.deleteImageByUrl(url, publicId);
+        try {
+            await window.firebase.deleteImageByUrl(url, publicId);
+        } catch (cloudinaryError) {
+            console.error("Non-blocking Cloudinary image deletion failed during gallery item delete:", cloudinaryError);
+        }
         await window.firebase.deleteGalleryItem(id);
         
         showAlertBanner("Gallery image successfully deleted.", "success");
