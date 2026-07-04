@@ -108,18 +108,20 @@ header {
 }
 
 .nav-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 1.25rem 2rem;
+    padding: 0.85rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
 
 .logo-container {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    flex-shrink: 0;
 }
 
 .logo-icon {
@@ -132,6 +134,7 @@ header {
     font-size: 1.5rem;
     font-weight: 800;
     letter-spacing: -0.5px;
+    white-space: nowrap;
 }
 
 .logo-text span {
@@ -141,41 +144,64 @@ header {
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 0.5rem; /* Compact capsule spacing */
     list-style: none;
+    margin-left: 4rem; /* Spacious gap between logo/brand and first navigation link */
+    margin-right: auto; /* Pushes navigation actions (theme toggle, etc) to the far right */
+}
+
+.nav-links li {
+    display: inline-flex;
+    align-items: center;
 }
 
 .nav-links a {
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
     color: var(--text-secondary);
-    position: relative;
-    padding: 0.25rem 0;
-}
-
-.nav-links a::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background-color: var(--accent);
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
     transition: var(--transition-smooth);
+    display: inline-block;
+    letter-spacing: 0.2px;
+    white-space: nowrap;
 }
 
-.nav-links a:hover, .nav-links a.active {
+.nav-links a:hover, 
+.nav-links a.active {
     color: var(--accent);
+    background-color: rgba(var(--accent-rgb), 0.08);
 }
 
-.nav-links a:hover::after, .nav-links a.active::after {
-    width: 100%;
+#lang-toggle {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+#lang-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background-color: rgba(var(--accent-rgb), 0.08);
 }
 
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1rem;
+    flex-shrink: 0;
 }
 
 /* Buttons */

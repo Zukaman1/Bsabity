@@ -20,7 +20,7 @@
         <div class="loader-spinner"></div>
     </div>
 
-    <!-- Header Navigation -->
+        <!-- Header Navigation -->
     <header>
         <nav class="nav-container">
             <a href="index.html" class="logo-container" aria-label="Bsabity Home">
@@ -29,19 +29,23 @@
             </a>
 
             <ul class="nav-links" id="nav-links">
-                <li><a href="index.html" data-i18n="nav-home">Home</a></li>
-                <li><a href="about.html" data-i18n="nav-about">About Us</a></li>
+                <li><a href="index.html" class="" data-i18n="nav-home">Home</a></li>
                 <li><a href="services.html" class="active" data-i18n="nav-services">Services</a></li>
-                <li><a href="gallery.html" data-i18n="nav-gallery">Gallery</a></li>
-                <li><a href="products.html" data-i18n="nav-products">Products</a></li>
-                <li><a href="contact.html" data-i18n="nav-contact">Contact Us</a></li>
-                <li><a href="admin.html" data-i18n="nav-admin">Admin Panel</a></li>
+                <li><a href="products.html" class="" data-i18n="nav-products">Products</a></li>
+                <li><a href="gallery.html" class="" data-i18n="nav-gallery">Gallery</a></li>
+                <li><a href="contact.html" class="" data-i18n="nav-contact">Contact Us</a></li>
+                <li><a href="about.html" class="" data-i18n="nav-about">About Us</a></li>
+                <li><a href="terms.html" class="" data-i18n="nav-terms">Terms & Conditions</a></li>
+                <li><a href="privacy.html" class="" data-i18n="nav-privacy">Privacy Policy</a></li>
+                <li><a href="admin.html" class="" data-i18n="nav-admin">Admin Panel</a></li>
+                <li>
+                    <button class="btn-icon" id="lang-toggle" aria-label="Change Language">
+                        <i class="fas fa-globe"></i> EN
+                    </button>
+                </li>
             </ul>
 
             <div class="nav-actions">
-                <button class="btn-icon" id="lang-toggle" aria-label="Change Language">
-                    <i class="fas fa-globe"></i> EN
-                </button>
                 <button class="btn-icon" id="theme-toggle" aria-label="Toggle Dark/Light Mode">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -195,8 +199,9 @@
                 </ul>
             </div>
         </div>
-        <div class="footer-bottom">
+                <div class="footer-bottom">
             <p>&copy; 2026 Bsabity Furniture Workshop. All Rights Reserved.</p>
+            <p class="designer-credit" style="font-size: 0.85rem; color: var(--text-secondary); opacity: 0.85;">Designed & Developed by <span style="color: var(--accent); font-weight: 700;">Isaacson</span></p>
             <p>Made in Kigali, Rwanda.</p>
         </div>
     </footer>
