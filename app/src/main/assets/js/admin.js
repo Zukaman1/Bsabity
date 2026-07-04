@@ -376,8 +376,27 @@ function initAdminFormHandlers() {
                 if (titleEl) titleEl.innerHTML = '<i class="fas fa-box-open" style="color: #059669; margin-right: 0.5rem;"></i> Add New Product';
 
             } catch (err) {
-                console.error("Error saving product: ", err);
-                showAlertBanner("Failed to save product details.", "error");
+                console.error("CRITICAL ERROR in product save flow:");
+                console.error("Full Error Object:", err);
+                if (err.stack) {
+                    console.error("JavaScript Error Stack:\n", err.stack);
+                }
+                if (err.status) {
+                    console.error("HTTP Status Code:", err.status);
+                }
+                if (err.responseBody) {
+                    console.error("Cloudinary Response Body:\n", err.responseBody);
+                }
+                
+                // Construct detailed error message for UI
+                let userMsg = "Failed to save product details.";
+                if (err.message) {
+                    userMsg += ` Error: ${err.message}`;
+                }
+                if (err.status) {
+                    userMsg += ` (HTTP ${err.status})`;
+                }
+                showAlertBanner(userMsg, "error");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalBtnHtml;

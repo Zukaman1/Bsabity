@@ -20,17 +20,51 @@ export async function uploadToCloudinary(file) {
 
     const endpoint = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 
-    const response = await fetch(endpoint, {
-        method: "POST",
-        body: formData
-    });
-
-    if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error?.message || `Cloudinary upload failed with status ${response.status}`);
+    let response;
+    try {
+        response = await fetch(endpoint, {
+            method: "POST",
+            body: formData
+        });
+    } catch (networkError) {
+        console.error("Network error during Cloudinary fetch:", networkError);
+        throw networkError;
     }
 
-    const data = await response.json();
+    const statusCode = response.status;
+    let responseBodyText = "";
+    try {
+        responseBodyText = await response.text();
+    } catch (textError) {
+        responseBodyText = "Could not read response body text";
+    }
+
+    console.log(`Cloudinary API raw status code: ${statusCode}`);
+    console.log(`Cloudinary API raw response body: ${responseBodyText}`);
+
+    if (!response.ok) {
+        let errData = {};
+        try {
+            errData = JSON.parse(responseBodyText);
+        } catch (_) {}
+        const errMsg = errData.error?.message || `Cloudinary upload failed with status ${statusCode}`;
+        const error = new Error(errMsg);
+        error.status = statusCode;
+        error.responseBody = responseBodyText;
+        throw error;
+    }
+
+    let data;
+    try {
+        data = JSON.parse(responseBodyText);
+    } catch (parseError) {
+        throw new Error("Failed to parse successful Cloudinary response: " + responseBodyText);
+    }
+
+    if (!data.secure_url) {
+        throw new Error("Cloudinary upload did not return secure_url in response data.");
+    }
+
     return {
         secure_url: data.secure_url,
         public_id: data.public_id
