@@ -289,13 +289,15 @@ function initAdminFormHandlers() {
                 const imageFileInput = document.getElementById('product-image-file');
 
                 let imageUrl = null;
+                let cloudinaryPublicId = null;
                 
                 // Upload new image to Storage if selected
                 if (imageFileInput && imageFileInput.files.length > 0) {
                     const file = imageFileInput.files[0];
-                    showAlertBanner(`Uploading "${file.name}" to Cloud Storage...`, "success");
+                    showAlertBanner(`Uploading "${file.name}" to Cloudinary...`, "success");
                     const uploadResult = await window.firebase.uploadImage(file, file.name, "products");
                     imageUrl = uploadResult.url;
+                    cloudinaryPublicId = uploadResult.publicId;
                 }
 
                 const productPayload = {
@@ -309,6 +311,13 @@ function initAdminFormHandlers() {
 
                 if (imageUrl) {
                     productPayload.image = imageUrl;
+                    productPayload.cloudinaryPublicId = cloudinaryPublicId;
+                } else if (idInput && idInput.value) {
+                    // Retain existing public id on update if no new image uploaded
+                    const existingProd = cachedAdminProducts.find(p => p.id === idInput.value);
+                    if (existingProd && existingProd.cloudinaryPublicId) {
+                        productPayload.cloudinaryPublicId = existingProd.cloudinaryPublicId;
+                    }
                 }
 
                 if (idInput && idInput.value) {
@@ -323,7 +332,8 @@ function initAdminFormHandlers() {
                                 title: nameInput.value.trim(),
                                 category: categorySelect.value,
                                 url: imageUrl,
-                                thumbnail: imageUrl
+                                thumbnail: imageUrl,
+                                cloudinaryPublicId: cloudinaryPublicId
                             };
                             await window.firebase.addGalleryItem(galleryItem);
                             console.log("Automatically saved updated product image to Firestore gallery collection.");
@@ -336,6 +346,7 @@ function initAdminFormHandlers() {
                     if (!imageUrl) {
                         // Unsplash design-conscious default fallbacks if no image was chosen
                         productPayload.image = "https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=600";
+                        productPayload.cloudinaryPublicId = null;
                     }
                     await window.firebase.addProduct(productPayload);
                     showAlertBanner("New masterpiece added to Firebase database!", "success");
@@ -347,7 +358,8 @@ function initAdminFormHandlers() {
                             title: productPayload.name,
                             category: productPayload.category,
                             url: finalImage,
-                            thumbnail: finalImage
+                            thumbnail: finalImage,
+                            cloudinaryPublicId: productPayload.cloudinaryPublicId || null
                         };
                         await window.firebase.addGalleryItem(galleryItem);
                         console.log("Automatically saved new product image to Firestore gallery collection.");
@@ -424,7 +436,7 @@ function initAdminFormHandlers() {
                     if (progressPercent) progressPercent.textContent = `${percent}%`;
 
                     try {
-                        // Upload directly to Cloud Storage
+                        // Upload directly to Cloudinary
                         const uploadResult = await window.firebase.uploadImage(file, file.name);
 
                         // Insert metadata into Firestore gallery collection
@@ -432,7 +444,8 @@ function initAdminFormHandlers() {
                             title: fileTitle,
                             category: categorySelect.value,
                             url: uploadResult.url,
-                            thumbnail: uploadResult.url
+                            thumbnail: uploadResult.url,
+                            cloudinaryPublicId: uploadResult.publicId || null
                         };
 
                         await window.firebase.addGalleryItem(newGalleryItem);
@@ -448,8 +461,8 @@ function initAdminFormHandlers() {
                 if (progressPercent) progressPercent.textContent = '100%';
                 
                 if (successfulUploads > 0) {
-                    if (progressText) progressText.textContent = `Upload completed! ${successfulUploads} of ${totalFiles} images uploaded to Firebase Storage.`;
-                    showAlertBanner(`Success! ${successfulUploads} assets synchronized to Firebase Storage.`, "success");
+                    if (progressText) progressText.textContent = `Upload completed! ${successfulUploads} of ${totalFiles} images uploaded to Cloudinary.`;
+                    showAlertBanner(`Success! ${successfulUploads} assets synchronized to Cloudinary.`, "success");
                     galleryForm.reset();
                 } else {
                     if (progressText) progressText.textContent = `Upload failed completely. 0 of ${totalFiles} images uploaded.`;
@@ -503,9 +516,9 @@ async function deleteProduct(id) {
 
     try {
         const prod = cachedAdminProducts.find(p => p.id === id);
-        // If product has custom Firebase Storage image, delete it to save space!
+        // If product has custom Cloudinary image, delete it!
         if (prod && prod.image) {
-            await window.firebase.deleteImageByUrl(prod.image);
+            await window.firebase.deleteImageByUrl(prod.image, prod.cloudinaryPublicId);
         }
         
         await window.firebase.deleteProduct(id);
@@ -544,7 +557,7 @@ function renderAdminGallery(images) {
 
         row.innerHTML = `
             <td style="text-align: center;">
-                <input type="checkbox" class="gallery-select-checkbox" data-id="${img.id}" data-url="${img.url}" style="width: 18px; height: 18px; cursor: pointer;">
+                <input type="checkbox" class="gallery-select-checkbox" data-id="${img.id}" data-url="${img.url}" data-public-id="${img.cloudinaryPublicId || ''}" style="width: 18px; height: 18px; cursor: pointer;">
             </td>
             <td>
                 <div style="display: flex; align-items: center; gap: 1rem;">
@@ -557,7 +570,7 @@ function renderAdminGallery(images) {
             </td>
             <td>
                 <div style="display: flex; justify-content: flex-end;">
-                    <button class="table-action-btn delete" onclick="deleteGalleryItem('${img.id}', '${img.url}')" title="Delete Gallery Image"><i class="fas fa-trash"></i></button>
+                    <button class="table-action-btn delete" onclick="deleteGalleryItem('${img.id}', '${img.url}', '${img.cloudinaryPublicId || ''}')" title="Delete Gallery Image"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         `;
@@ -574,12 +587,12 @@ function renderAdminGallery(images) {
 /**
  * Handles individual item deletion
  */
-async function deleteGalleryItem(id, url) {
-    if (!confirm("Are you sure you want to delete this portfolio photo? This will permanently delete it from Firebase Storage.")) return;
+async function deleteGalleryItem(id, url, publicId) {
+    if (!confirm("Are you sure you want to delete this portfolio photo? This will permanently delete it from Cloudinary.")) return;
 
     try {
-        showAlertBanner("Deleting image from Cloud Storage...", "success");
-        await window.firebase.deleteImageByUrl(url);
+        showAlertBanner("Deleting image from Cloudinary...", "success");
+        await window.firebase.deleteImageByUrl(url, publicId);
         await window.firebase.deleteGalleryItem(id);
         
         showAlertBanner("Gallery image successfully deleted.", "success");
@@ -611,19 +624,20 @@ function initBulkSelectionHandlers() {
             const selectedBoxes = document.querySelectorAll('.gallery-select-checkbox:checked');
             if (selectedBoxes.length === 0) return;
 
-            if (!confirm(`Are you sure you want to delete the ${selectedBoxes.length} selected images? This will permanently delete them from Firebase Storage and cannot be undone.`)) {
+            if (!confirm(`Are you sure you want to delete the ${selectedBoxes.length} selected images? This will permanently delete them from Cloudinary and cannot be undone.`)) {
                 return;
             }
 
-            showAlertBanner(`Deleting ${selectedBoxes.length} images from Firebase...`, "success");
+            showAlertBanner(`Deleting ${selectedBoxes.length} images from Cloudinary...`, "success");
 
             let deletedCount = 0;
 
             for (const cb of selectedBoxes) {
                 const id = cb.getAttribute('data-id');
                 const url = cb.getAttribute('data-url');
+                const publicId = cb.getAttribute('data-public-id');
                 try {
-                    await window.firebase.deleteImageByUrl(url);
+                    await window.firebase.deleteImageByUrl(url, publicId);
                     await window.firebase.deleteGalleryItem(id);
                     deletedCount++;
                 } catch (error) {

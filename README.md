@@ -30,9 +30,9 @@ Since the project uses an incremental compilation pipeline, you can compile and 
 
 ---
 
-## 🔥 Pure Firebase Cloud Architecture
+## 🔥 Hybrid Cloud Architecture (Firestore & Cloudinary)
 
-The entire project is backed by Firebase for secure, real-time, scale-ready cloud storage and data persistence.
+The entire project is backed by a hybrid cloud architecture, combining the real-time data synchronization of **Firebase Firestore** with the robust media optimization of **Cloudinary**.
 
 ### 🗄️ 1. Cloud Firestore Database
 The system uses real-time snapshot listeners (`onSnapshot`) to synchronize product listings and the portfolio showcase instantly across all client devices without full-page reloads.
@@ -44,19 +44,34 @@ The system uses real-time snapshot listeners (`onSnapshot`) to synchronize produ
   - `price` (String)
   - `discount` (Number)
   - `availability` (String)
-  - `image` (String - Storage download URL)
+  - `image` (String - Cloudinary secure URL)
+  - `cloudinaryPublicId` (String - Cloudinary resource public ID)
   - `createdAt` (String - ISO Timestamp)
 - **`gallery` Collection:** Stores the portfolio images rendered in the masonry gallery grid:
   - `title` (String)
   - `category` (String)
-  - `url` (String - Storage download URL)
-  - `thumbnail` (String - Storage download URL)
+  - `url` (String - Cloudinary secure URL)
+  - `thumbnail` (String - Cloudinary secure URL)
+  - `cloudinaryPublicId` (String - Cloudinary resource public ID)
   - `createdAt` (String - ISO Timestamp)
 
-### 📁 2. Firebase Storage
-Assets are organized cleanly inside Firebase Storage buckets:
-- **`gallery/`**: Main portfolio photos and client showcase files.
-- **`products/`**: Images associated with catalog products.
+### 📁 2. Cloudinary Media Storage
+Images and portfolio files are stored on Cloudinary. The frontend performs direct, secure unsigned uploads to Cloudinary via the REST Upload API.
+
+#### Cloudinary Configuration
+To configure Cloudinary:
+1. Open the file **`/js/cloudinary.js`**.
+2. Update the credentials with your Cloudinary Cloud Name and Unsigned Upload Preset:
+   ```javascript
+   export const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUD_NAME";
+   export const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET";
+   ```
+3. To enable Unsigned Uploads in Cloudinary:
+   - Go to your Cloudinary Dashboard.
+   - Click on **Settings** (Gear Icon) -> **Upload**.
+   - Scroll down to **Upload presets** and click **Add upload preset**.
+   - Change the **Signing mode** from *Signed* to *Unsigned*.
+   - Copy the generated preset name and paste it as `CLOUDINARY_UPLOAD_PRESET`.
 
 ### 🛡️ 3. Security Rules Configurations
 
@@ -66,18 +81,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
-      allow read, write: if true;
-    }
-  }
-}
-```
-
-#### Firebase Storage Rules (`storage.rules`):
-```javascript
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    match /{allPaths=**} {
       allow read, write: if true;
     }
   }
@@ -94,14 +97,14 @@ To make inventory and showcase updates seamless, Bsabity Furniture uses an integ
 2. **Product Save Flow:**
    - Add new items or edit existing ones.
    - When saving, if a custom preview image is uploaded:
-     - It is sent to Firebase Storage under the `products/` path.
-     - A product document is created in the Firestore `products` collection.
-     - A matching showcase document is automatically created in the `gallery` collection.
+     - It is sent to Cloudinary via the REST Upload API.
+     - A product document is created in the Firestore `products` collection with the Cloudinary `image` and `cloudinaryPublicId`.
+     - A matching showcase document is automatically created in the `gallery` collection with the Cloudinary `url`, `thumbnail`, and `cloudinaryPublicId`.
 3. **Gallery Upload Flow:**
-   - Multi-select multiple files to bulk-upload to Firebase Storage under the `gallery/` path.
+   - Multi-select multiple files to bulk-upload to Cloudinary.
    - Documents are created instantly in the `gallery` collection and updated on the gallery page in real-time.
 4. **Delete and Purge Flow:**
-   - Clicking delete on any product or gallery image removes the Firestore document and purges the file from Firebase Storage automatically to save bucket space.
+   - Clicking delete on any product or gallery image removes the Firestore document and requests deletion of the file from Cloudinary (using the `cloudinaryPublicId` when configured).
 
 ---
 

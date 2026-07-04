@@ -21,14 +21,7 @@ import {
     setDoc,
     writeBatch
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { 
-    getStorage, 
-    ref, 
-    uploadBytes, 
-    getDownloadURL, 
-    deleteObject, 
-    listAll 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinary.js";
 
 // Secure & correct production-ready config
 const firebaseConfig = {
@@ -45,7 +38,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
-const storage = getStorage(app);
 
 // Default lists for automatic database seeding
 const DEFAULT_PRODUCTS = [
@@ -230,7 +222,6 @@ async function seedInitialDatabase() {
 // Global Exports
 window.firebase = {
     db,
-    storage,
     
     // Products REST replacement CRUD with onSnapshot Realtime Listeners
     onProductsUpdate: (callback) => {
@@ -314,53 +305,30 @@ window.firebase = {
         await deleteDoc(docRef);
     },
 
-    // Firebase Storage upload & delete with built-in timeout to avoid infinite hanging
+    // Cloudinary upload & delete with built-in error safety
     uploadImage: async (file, fileName, folder = "gallery") => {
         try {
-            const uniqueName = `${folder}/${Date.now()}_${fileName || file.name}`;
-            const storageRef = ref(storage, uniqueName);
-            
-            // Timeout limit: 20 seconds for the entire chunk upload to prevent infinite spinner
-            const uploadPromise = uploadBytes(storageRef, file);
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Upload timed out (20 second limit exceeded)")), 20000)
-            );
-            
-            const snapshot = await Promise.race([uploadPromise, timeoutPromise]);
-            
-            // Get URL with a 10s timeout
-            const urlPromise = getDownloadURL(snapshot.ref);
-            const urlTimeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Getting download URL timed out")), 10000)
-            );
-            
-            const downloadUrl = await Promise.race([urlPromise, urlTimeoutPromise]);
-            
+            const result = await uploadToCloudinary(file);
             return {
-                url: downloadUrl,
-                storagePath: uniqueName
+                url: result.secure_url,
+                publicId: result.public_id
             };
         } catch (error) {
-            console.error("Firebase uploadImage encountered an error:", error);
+            console.error("Cloudinary uploadImage encountered an error:", error);
             throw error; // Propagate error so that calling UI components can turn off their loading spinners/disable-states
         }
     },
 
-    deleteImageByUrl: async (imageUrl) => {
+    deleteImageByUrl: async (imageUrl, publicId) => {
         try {
-            // Extract the storage reference path from the download URL if it belongs to Firebase
-            if (imageUrl.includes("firebasestorage.googleapis.com")) {
-                const decodedUrl = decodeURIComponent(imageUrl);
-                const matches = decodedUrl.match(/\/o\/(.*?)\?alt=media/);
-                if (matches && matches[1]) {
-                    const storagePath = matches[1];
-                    const storageRef = ref(storage, storagePath);
-                    await deleteObject(storageRef);
-                    console.log("Successfully deleted object from Storage:", storagePath);
-                }
+            if (publicId) {
+                await deleteFromCloudinary(publicId);
+                console.log("Successfully deleted object from Cloudinary:", publicId);
+            } else {
+                console.log("No Cloudinary public ID provided, skipping secure delete.");
             }
         } catch (error) {
-            console.error("Error deleting image from Storage: ", error);
+            console.error("Error deleting image from Cloudinary (publicId):", error);
         }
     },
 
